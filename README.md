@@ -8,3 +8,11 @@ Privacidade total  no conteúdo, que é direcionado somente pra quem você envio
 Você tem o backup da loja e seus clientes também ! Tudo simples e de formar local !
 
 
+
+Projeto de ajudo ?
+
+
+[Patreon](https://www.patreon.com/c/WorldsEcology/membership)
+
+[Ko-fi](https://ko-fi.com/V7V01VK9Z0#)
+
