@@ -16,3 +16,4 @@ Projeto de ajudo ?
 
 [Ko-fi](https://ko-fi.com/V7V01VK9Z0#)
 
+PIX: 2c04642f-fbb7-4b0f-9efb-434184b133f4
