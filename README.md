@@ -1,6 +1,6 @@
 
 
-Codigo gerado pelo Gemini, testes feitos 10/03/2026
+Codigo gerado pelo Gemini, testes feitos 10/03/2026, revisado e atualizado pelo deepseek em 26/03/2026
 
 
 É uma loja offline pelo conceito, você criar o conteúdo exporta  e envia para seu cliente, seu cliente importa visualiza e faz o pagamento diretamente pra você usando chave pix ou que você cadastrar !
