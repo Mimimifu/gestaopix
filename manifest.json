@@ -1,0 +1,22 @@
+{
+  "name": "GestãoPIX - Catálogo Autônomo P2P",
+  "short_name": "GestãoPIX",
+  "description": "Catálogo de produtos offline-first com pagamentos PIX e conexão P2P.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/10149/10149458.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/10149/10149458.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
