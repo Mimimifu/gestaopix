@@ -1,0 +1,32 @@
+name: Gerar APK do GestãoPIX
+on:
+  push:
+    branches:
+      - main # Toda vez que você atualizar o código, ele gera um APK novo
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Instalar Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
+
+      - name: Gerar Projeto Android
+        # Aqui o Bubblewrap lê o seu site da Vercel e cria o projeto
+        run: |
+          bubblewrap init --manifest=https://gestaopix.vercel.app/manifest.json
+          bubblewrap build
+          
+      - name: Upload do APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: GestaoPIX-APK
+          path: ./*.apk
