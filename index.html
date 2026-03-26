@@ -136,6 +136,11 @@
   	} else {
     	console.log('PeerJS carregado localmente com sucesso.');
   	}
+		
+	if ('serviceWorker' in navigator) {
+  		navigator.serviceWorker.register('sw.js');
+	}
+		
     </script>	
     <script>
         let db = JSON.parse(localStorage.getItem('gpx_db')) || [];
