@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<title>GestãoPIX | Monte sua Loja Grátis em 1 Minuto - Sem Taxas</title>
+	<title>GestãoPIX | Crie sua Loja Grátis e Venda sem Taxas em 1 minuto</title>
 
-	<meta name="description" content="Não tem dinheiro para um site? O GestãoPIX é a ferramenta gratuita para quem precisa vender hoje. Sem mensalidade, sem cadastro e 100% privado. Comece agora!">
+	<meta name="description" content="Não pode pagar por um site? O GestãoPIX é 100% gratuito e privado. Monte seu catálogo, envie para clientes e receba pelo PIX direto na sua conta. Sem mensalidade!">
 
-	<meta name="keywords" content="vender de graça, montar loja online gratis, sistema de vendas pix, gerenciar estoque no celular, vender sem pagar taxa, catalogo de produtos whatsapp gratuito">
+	<meta name="keywords" content="loja virtual gratis, catalogo de produtos pdf, vender pelo whatsapp gratis, sistema de vendas sem taxa, montar loja online agora">
     <style>
         :root {
             --bg: #f8fafc; --surface: #ffffff; --text: #0f172a;
@@ -88,6 +88,7 @@
 
         <div style="margin-top: auto; display: flex; flex-direction: column; gap: 5px;">
             <div class="config-btns" style="display: flex; flex-direction: column; gap: 5px;">
+				<button class="btn-s" style="border-color: var(--primary); color: var(--primary);" onclick="openM('m-guide')">📖 <span class="txt">Como Usar</span></button>
 		<button class="btn-s" style="color: #e91e63; border-color: #f8bbd0;" onclick="openM('m-donate')">❤️ <span class="txt">Apoiar Projeto</span></button>
                 <button class="btn-s" style="font-size: 0.7rem; padding:5px" onclick="toggleTheme()">🌓 <span class="txt">Tema</span></button>
                 <button class="btn-s" style="font-size: 0.7rem; padding:5px" onclick="toggleSide()">↔️ <span class="txt">Lado</span></button>
@@ -131,7 +132,42 @@
         <h3>Criar Sala</h3><input type="text" id="ho-id" placeholder="Nome da Loja"><button class="btn-p" onclick="conn('host')">Iniciar</button><button class="btn-s" onclick="closeM()">Cancelar</button>
     </div></div>
 
+<div id="m-guide" class="modal">
+    <div class="modal-c" style="max-width: 450px;">
+        <h2 style="text-align: center; color: var(--primary); margin-bottom: 20px;">Guia GestãoPIX</h2>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px; font-size: 0.9rem;">
+            
+            <section style="border-left: 3px solid var(--primary); padding-left: 10px;">
+                <strong>1. Crie seu Catálogo</strong><br>
+                Use o botão ➕ para cadastrar seus produtos, fotos, preços e sua chave PIX. Tudo fica salvo no seu celular.
+            </section>
 
+			<section style="border-left: 3px solid var(--primary); padding-left: 10px;">
+                <strong>2. Crie uma Sala </strong><br>
+                Use o botão 📡 para criar uma sala, coloque o nome e solicite que o cliente entre na mesma sala e pronto dados sincronizados.
+				Caso não funcione por algum motivo de rede ou firewall basta usar as opçoes a baixo exporta e importa o catologo é você 100% no controle.
+            </section>
+
+            <section style="border-left: 3px solid #2ecc71; padding-left: 10px;">
+                <strong>2. Exportar (Sua Loja no Arquivo)</strong><br>
+                Clique em 📤 **Exportar**. O sistema gera um arquivo `.json`. Esse arquivo **é a sua loja**. Mande ele pelo Telegram ou E-mail para o seu cliente.
+            </section>
+
+            <section style="border-left: 3px solid #f1c40f; padding-left: 10px;">
+                <strong>3. Importar (O Cliente vê)</strong><br>
+                O cliente abre o site e clica em 📥 **Importar**. Ao selecionar o seu arquivo, ele verá seus produtos e o botão de comprar.
+            </section>
+
+            <section style="border-left: 3px solid #e74c3c; padding-left: 10px;">
+                <strong>4. Venda Direta</strong><br>
+                O cliente clica em comprar, copia sua chave e te paga. Sem intermediários, sem taxas, sem demora.
+            </section>
+        </div>
+
+        <button class="btn-p" style="margin-top: 20px;" onclick="closeM()">Entendi, vamos vender!</button>
+    </div>
+</div>
 
 <div id="m-donate" class="modal">
     <div class="modal-c" style="max-width: 400px; text-align: center;">
