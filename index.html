@@ -235,7 +235,13 @@
         function conn(mode) {
             const id = mode === 'host' ? document.getElementById('ho-id').value : document.getElementById('in-id').value;
             if(!id) return; closeM();
-            peer = new Peer(mode === 'host' ? id : null);
+			const config = {
+				config: { 
+					'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }],
+					'sdpSemantics': 'unified-plan'
+				}
+			};
+            peer = new Peer(mode === 'host' ? id : null, config);
             peer.on('open', () => {
                 if(mode === 'client') { 
                     active = peer.connect(id); 
