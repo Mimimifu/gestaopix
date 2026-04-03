@@ -204,26 +204,21 @@
 
     <script src="/peerjs.min.js"></script>
     <script>
-	if (typeof Peer === 'undefined') {
-    	console.warn('PeerJS local não encontrado. Carregando via CDN...');
-    	var sdk = document.createElement('script');
-    	sdk.src = "https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js";
-    	document.head.appendChild(sdk);
-  	} else {
-    	console.log('PeerJS carregado localmente com sucesso.');
-  	}
-    </script>
+		if (typeof Peer === 'undefined') {
+	    	console.warn('PeerJS local não encontrado. Carregando via CDN...');
+	    	var sdk = document.createElement('script');
+	    	sdk.src = "https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js";
+	    	document.head.appendChild(sdk);
+	  	} else {
+	    	console.log('PeerJS carregado localmente com sucesso.');
+	  	}
+	
+	    function copyDevPix() {
+	        const key = "2c04642f-fbb7-40b0-9efb-434184b133f4";
+	        navigator.clipboard.writeText(key);
+	        alert("Chave do Desenvolvedor copiada! Gratidão pelo apoio.");
+	    }
 
-
-
-<script>
-    function copyDevPix() {
-        const key = "2c04642f-fbb7-40b0-9efb-434184b133f4";
-        navigator.clipboard.writeText(key);
-        alert("Chave do Desenvolvedor copiada! Gratidão pelo apoio.");
-    }
-</script>	
-    <script>
         let db = JSON.parse(localStorage.getItem('gpx_db')) || [];
         let peer, active, isHost = false;
 
@@ -232,26 +227,68 @@
         function toggleTheme() { const h = document.documentElement; h.setAttribute('data-theme', h.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
         function toggleSide() { document.body.classList.toggle('menu-right'); }
 
-        function conn(mode) {
-            const id = mode === 'host' ? document.getElementById('ho-id').value : document.getElementById('in-id').value;
-            if(!id) return; closeM();
-			const config = {
-				config: { 
-					'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }],
-					'sdpSemantics': 'unified-plan'
-				}
-			};
-            peer = new Peer(mode === 'host' ? id : null, config);
-            peer.on('open', () => {
-                if(mode === 'client') { 
-                    active = peer.connect(id); 
-                    sub(active); 
-                    document.body.classList.add('view-mode'); // Ativa ocultação para cliente
-                }
-                document.getElementById('status').innerText = "CONECTADO: " + id;
-            });
-            peer.on('connection', (c) => { isHost = true; active = c; sub(c); setTimeout(() => push(), 1000); });
-        }
+		function conn(mode) {
+		    const id = mode === 'host' ? document.getElementById('ho-id').value : document.getElementById('in-id').value;
+		    if(!id) return; 
+		    closeM();
+		
+		    // 1. Configurações do Broker (Onde o aperto de mão acontece)
+		    const isOffline = !navigator.onLine; // Detecta se está sem internet
+		    
+		    const brokerConfig = isOffline ? {
+		        host: 'localhost', // Tenta achar um server.js rodando no próprio aparelho/PC
+		        port: 9000,
+		        path: '/',
+		        secure: false
+		    } : {
+		        host: 'gestaopix.onrender.com', // Sua URL do Render (conforme o print)
+		        port: 443,
+		        path: '/',
+		        secure: true
+		    };
+		
+		    // 2. Configurações de RTC (O que você já tinha dos STUN da Google)
+		    const rtcConfig = {
+		        'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }],
+		        'sdpSemantics': 'unified-plan'
+		    };
+		
+		    // Unificando as configurações para o PeerJS
+		    const finalConfig = {
+		        ...brokerConfig,
+		        config: rtcConfig
+		    };
+		
+		    console.log(`Conectando via: ${isOffline ? 'Rede Local' : 'Nuvem (Render)'}`);
+		
+		    // Inicializa o Peer
+		    peer = new Peer(mode === 'host' ? id : null, finalConfig);
+		
+		    peer.on('open', () => {
+		        if(mode === 'client') { 
+		            active = peer.connect(id); 
+		            sub(active); 
+		            document.body.classList.add('view-mode'); 
+		        }
+		        document.getElementById('status').innerText = "CONECTADO: " + id;
+		    });
+		
+		    peer.on('connection', (c) => { 
+		        isHost = true; 
+		        active = c; 
+		        sub(c); 
+		        setTimeout(() => push(), 1000); 
+		    });
+		
+		    // Tratamento de erro para fallback automático
+		    peer.on('error', (err) => {
+		        console.error("Erro no Peer:", err.type);
+		        if(!isOffline && err.type === 'network') {
+		            document.getElementById('status').innerText = "Erro na Nuvem. Tentando Local...";
+		            // Aqui você poderia chamar a função novamente forçando o modo local se quiser
+		        }
+		    });
+		}
 
         function sub(c) {
             c.on('data', (d) => {
