@@ -130,9 +130,27 @@
         channel
             .on('broadcast', { event: 'sync' }, (payload) => {
                 const d = payload.payload;
-                if(d.type === 'db') { db = d.data; document.body.classList.add('view-mode'); render(); updFilt(); }
-                if(d.type === 'chat') { addMsg(d.data, 'them'); document.getElementById('notif').style.display='inline'; }
-                if(d.type === 'req' && isHost) push();
+                
+                if(d.type === 'db') { 
+                    db = d.data; 
+                    
+                    // SÓ ADICIONA VIEW-MODE SE NÃO FOR O HOST
+                    if (!isHost) {
+                        document.body.classList.add('view-mode'); 
+                    }
+                    
+                    render(); 
+                    updFilt(); 
+                }
+                
+                if(d.type === 'chat') { 
+                    addMsg(d.data, 'them'); 
+                    document.getElementById('notif').style.display = 'inline'; 
+                }
+                
+                if(d.type === 'req' && isHost) {
+                    push(); // Host responde enviando o banco atualizado
+                }
             })
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
