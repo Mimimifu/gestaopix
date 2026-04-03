@@ -121,11 +121,18 @@
     function conn(mode) {
         const roomId = mode === 'host' ? document.getElementById('ho-id').value : document.getElementById('in-id').value;
         if(!roomId) return; closeM();
+
+        // --- LIMPEZA DE SEGURANÇA ---
+        if(channel) {
+            await sb.removeChannel(channel); 
+            console.log("Conexão anterior encerrada.");
+        }
+        // ----------------------------
         
         document.getElementById('status').innerText = "CONECTANDO...";
 
         // Usando a variável 'sb' definida acima
-        channel = sb.channel('room_' + roomId, { config: { broadcast: { self: true } } });
+        channel = sb.channel('room_' + roomId, { config: { broadcast: { self: false } } });
 
         channel
             .on('broadcast', { event: 'sync' }, (payload) => {
@@ -155,21 +162,42 @@
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
                     document.getElementById('status').innerText = "LIVE: " + roomId;
-                    if(mode === 'client') channel.send({ type: 'broadcast', event: 'sync', payload: { type: 'req' } });
-                    else isHost = true;
+                    // if(mode === 'client') channel.send({ type: 'broadcast', event: 'sync', payload: { type: 'req' } });
+                    // else isHost = true;
+                    if(mode === 'client') {
+                        isHost = false; // Garante que cliente não é host
+                        channel.send({ type: 'broadcast', event: 'sync', payload: { type: 'req' } });
+                    } else {
+                        isHost = true;
+                    }
                 }
             });
     }
 
         function push() {
             if(channel && isHost) channel.send({ type: 'broadcast', event: 'sync', payload: { type: 'db', data: db } });
+            
         }
 
+        // function sendChat() {
+        //     const i = document.getElementById('chat-i');
+        //     if(!i.value || !channel) return;
+        //     channel.send({ type: 'broadcast', event: 'sync', payload: { type: 'chat', data: i.value } });
+        //     addMsg(i.value, 'me'); i.value = '';
+        // }
+
         function sendChat() {
-            const i = document.getElementById('chat-i');
-            if(!i.value || !channel) return;
-            channel.send({ type: 'broadcast', event: 'sync', payload: { type: 'chat', data: i.value } });
-            addMsg(i.value, 'me'); i.value = '';
+            const msg = document.getElementById('chat-input').value;
+            if (!msg || !channel) return;
+        
+            channel.send({
+                type: 'broadcast',
+                event: 'chat',
+                payload: { data: msg }
+            });
+        
+            addMsg(msg, 'me'); // Adiciona na sua tela
+            document.getElementById('chat-input').value = '';
         }
 
         // Funções de Interface
