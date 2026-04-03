@@ -20,7 +20,7 @@ const server = app.listen(port, () =>{
 
 const peerServer = PeerServer({
     path: '/',
-    proxied: true, 
+    proxied: true,
     server: server,
 });
 
