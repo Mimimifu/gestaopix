@@ -14,13 +14,13 @@ app.get('/',(req,res)=>{
     res.sendFile(path.join,(__dirname,'index.html'));
 })
 
-const server = app.lister(port, () =>{
+const server = app.listen(port, () =>{
     console.log(`Server ON port ${port}`);
 })
 
 const peerServer = PeerServer({
     path: '/',
-    proxied: true, // GitHub/Render/Heroku/Vercel
+    proxied: true, 
     server: server,
 });
 
