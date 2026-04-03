@@ -1,11 +1,25 @@
+const express = require('express');
+
+const path = require('path');
+
 const { PeerServer } = require('peer');
+
+const app = express();
 
 const port = process.env.PORT || 9000;
 
+app.get('/',(req,res)=>{
+    res.sendFile(path.join,(__dirname,'index.html'));
+})
+
+const server = app.lister(port, () =>{
+    console.log(`Server ON port ${port}`);
+})
+
 const peerServer = PeerServer({
-    port: port,
-    path: '/myapp',
-    proxied: true // Importante para rodar atrás de proxies como o do GitHub/Render/Heroku
+    path: '/',
+    proxied: true, // GitHub/Render/Heroku/Vercel
+    server: server,
 });
 
 console.log(`Servidor PeerJS rodando na porta: ${port}`);
