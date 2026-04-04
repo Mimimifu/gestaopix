@@ -75,8 +75,8 @@
             <button class="btn-s" style="width: 35px; padding: 5px;" onclick="document.body.classList.toggle('collapsed')">☰</button>
 
         </div>
-        
-        <button class="btn-s" id="btn-enter" data-i18n="enter" onclick="openM('m-languages)">🈯 <span class="txt">Idioma</span></button>
+
+        <button class="btn-s" id="btn-language" data-i18n="lang" onclick="openM('m-languages)">🈯 <span class="txt">Idioma</span></button>
 
         <button class="btn-s" id="btn-enter" data-i18n="enter" onclick="openM('m-join')">🌐 <span class="txt">Entrar na Sala</span></button>
         
@@ -93,7 +93,7 @@
                 <button class="btn-s" style="border-color: var(--primary); color: var(--primary);" data-i18n="guide" onclick="openM('m-guide')">📖 <span class="txt">Como Usar</span></button>
                 <button class="btn-s" style="color: #e91e63; border-color: #f8bbd0;" data-i18n="support" onclick="openM('m-donate')">❤️ <span class="txt">Apoiar Projeto</span></button>
                 
-                <button class="btn-s" data-i18n="theme" style="font-size: 0.7rem; padding:5px" onclick="goTor()">🧅🛡️ <span class="txt">Tor</span></button>
+                <button class="btn-s" data-i18n="tor" style="font-size: 0.7rem; padding:5px" onclick="goTor()">🧅🛡️ <span class="txt">Tor</span></button>
                 <button class="btn-s" data-i18n="theme" style="font-size: 0.7rem; padding:5px" onclick="toggleTheme()">🌓 <span class="txt">Tema</span></button>
                 <button class="btn-s" data-i18n="side" style="font-size: 0.7rem; padding:5px" onclick="toggleSide()">↔️ <span class="txt">Lado</span></button>
             </div>
@@ -120,9 +120,9 @@
 
     <div id="m-languages" class="modal">
         <div class="modal-c">
-            <button class="btn-p" onclick="setLang('pt')" style="font-size:0.6rem">PT</button>
-            <button class="btn-p" onclick="setLang('en')" style="font-size:0.6rem">EN</button>
-            <button class="btn-p" onclick="setLang('zh')" style="font-size:0.6rem">中文</button>
+            <button class="btn-p" onclick="setLang('pt')"  style="font-size:0.6rem">PT</button>
+            <button class="btn-p" onclick="setLang('en')"  style="font-size:0.6rem">EN</button>
+            <button class="btn-p" onclick="setLang('zh')"  style="font-size:0.6rem">中文</button>
         </div>
     </div>
 
@@ -222,6 +222,7 @@
         // TRADUÇÕES COMPLETAS
         const i18n = {
             pt: {
+                lang: "Português",
                 title_tab: "GestãoPIX | Crie sua Loja Grátis e Venda sem Taxas em 1 minuto",
                 title: "GestãoPIX",
                 enter: "Entrar na Sala",
@@ -277,6 +278,7 @@
                 all_categories: "Tudo"
             },
             en: {
+                lang: "Enghish",
                 title_tab: "PIXManage | Create your Free Store and Sell without Fees in 1 minute",
                 title: "PIXManage",
                 enter: "Join Room",
@@ -332,6 +334,7 @@
                 all_categories: "All"
             },
             zh: {
+                lang: "中文",
                 title_tab: "PIX管理 | 免费创建店铺，1分钟无手续费销售",
                 title: "PIX管理",
                 enter: "加入房间",
