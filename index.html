@@ -73,13 +73,10 @@
         <div class="nav-head" style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
             <span class="txt" data-i18n="title">GestãoPIX</span>
             <button class="btn-s" style="width: 35px; padding: 5px;" onclick="document.body.classList.toggle('collapsed')">☰</button>
-            <button class="btn-p" onclick="setLang('pt')" style="font-size:0.6rem">PT</button>
-            <button class="btn-p" onclick="setLang('en')" style="font-size:0.6rem">EN</button>
-            <button class="btn-p" onclick="setLang('zh')" style="font-size:0.6rem">中文</button>
-        </div>
-        <div style="display:flex; gap:2px; margin-top:5px;">
 
         </div>
+        
+        <button class="btn-s" id="btn-enter" data-i18n="enter" onclick="openM('m-languages)">🈯 <span class="txt">Idioma</span></button>
 
         <button class="btn-s" id="btn-enter" data-i18n="enter" onclick="openM('m-join')">🌐 <span class="txt">Entrar na Sala</span></button>
         
@@ -119,6 +116,14 @@
         </div>
         <div id="msgs"></div>
         <div style="padding: 10px; display: flex; gap: 5px;"><input type="text" id="chat-i" data-i18n="chat_placeholder" placeholder="Digite sua mensagem..." style="flex:1" onkeypress="if(event.key==='Enter') sendChat()"><button onclick="sendChat()" style="background:var(--primary); color:white; padding: 5px 10px; border-radius: 6px;">></button></div>
+    </div>
+
+    <div id="m-languages" class="modal">
+        <div class="modal-c">
+            <button class="btn-p" onclick="setLang('pt')" style="font-size:0.6rem">PT</button>
+            <button class="btn-p" onclick="setLang('en')" style="font-size:0.6rem">EN</button>
+            <button class="btn-p" onclick="setLang('zh')" style="font-size:0.6rem">中文</button>
+        </div>
     </div>
 
     <div id="m-edit" class="modal"><div class="modal-c">
