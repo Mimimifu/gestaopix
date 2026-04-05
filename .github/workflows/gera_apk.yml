@@ -3,7 +3,8 @@ on:
   push:
     branches:
       - main # Toda vez que você atualizar o código, ele gera um APK novo
-
+  workflow_dispatch:
+  
 jobs:
   build:
     runs-on: ubuntu-latest
