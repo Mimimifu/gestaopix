@@ -23,7 +23,7 @@ jobs:
       - name: Gerar Projeto Android
         # Aqui o Bubblewrap lê o seu site da Vercel e cria o projeto
         run: |
-          bubblewrap init --manifest=https://gestaopix.vercel.app/manifest.json
+          yes | bubblewrap init --manifest=https://gestaopix.vercel.app/manifest.json
           bubblewrap build --skipConfig
           
       - name: Upload do APK
