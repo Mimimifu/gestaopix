@@ -15,7 +15,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 24
 
       - name: Instalar Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
@@ -24,7 +24,7 @@ jobs:
         # Aqui o Bubblewrap lê o seu site da Vercel e cria o projeto
         run: |
           bubblewrap init --manifest=https://gestaopix.vercel.app/manifest.json
-          bubblewrap build
+          bubblewrap build --skipConfig
           
       - name: Upload do APK
         uses: actions/upload-artifact@v4
