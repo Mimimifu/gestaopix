@@ -15,7 +15,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 18
 
       - name: Instalar Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
@@ -31,3 +31,5 @@ jobs:
         with:
           name: GestaoPIX-APK
           path: ./*.apk
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
