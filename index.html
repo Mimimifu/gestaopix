@@ -83,7 +83,7 @@
         <div class="admin" id="admin-tools" style="display:flex; flex-direction:column; gap:5px; margin-top:10px;">
             <button class="btn-p" data-i18n="newItem" onclick="openEdit()">➕ <span class="txt">Novo Item</span></button>
             <button class="btn-s" data-i18n="live" onclick="openM('m-host')">📡 <span class="txt">Live Host</span></button>
-            <button class="btn-s" style="font-size: 0.7rem; padding:5px" onclick="location.href='auditoria.html'">📓 <span class="txt">Auditoria</span></button>
+            <button class="btn-s" style="font-size: 0.7rem; padding:5px" onclick="window.open('auditoria.html', '_blank')">📓 <span class="txt">Auditoria</span></button>
             <button class="btn-s" data-i18n="import" onclick="document.getElementById('f-in').click()">📥 <span class="txt">Importar</span></button>
             <button class="btn-s" data-i18n="export" onclick="exportData()">📤 <span class="txt">Exportar</span></button>
             <input type="file" id="f-in" style="display:none" onchange="importData(event)">
@@ -93,7 +93,7 @@
             <div class="config-btns" style="display: flex; flex-direction: column; gap: 5px;">
                 <button class="btn-s" style="border-color: var(--primary); color: var(--primary);" data-i18n="guide" onclick="openM('m-guide')">📖 <span class="txt">Como Usar</span></button>
                 <button class="btn-s" style="color: #e91e63; border-color: #f8bbd0;" data-i18n="support" onclick="openM('m-donate')">❤️ <span class="txt">Apoiar Projeto</span></button>
-                <button class="btn-s" style="font-size: 0.7rem; padding:5px" onclick="window.open('auditoria.html', '_blank')">📓 <span class="txt">Auditoria</span></button>
+                
                 <button class="btn-s" data-i18n="tor" style="font-size: 0.7rem; padding:5px" onclick="goTor()">🧅🛡️ <span class="txt">Tor</span></button>
                 <button class="btn-s" data-i18n="theme" style="font-size: 0.7rem; padding:5px" onclick="toggleTheme()">🌓 <span class="txt">Tema</span></button>
                 <button class="btn-s" data-i18n="side" style="font-size: 0.7rem; padding:5px" onclick="toggleSide()">↔️ <span class="txt">Lado</span></button>
