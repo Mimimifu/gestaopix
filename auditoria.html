@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GestãoPIX | Auditoria de Cédulas</title>
+    <style>
+        :root { --bg: #f1f5f9; --surface: #ffffff; --primary: #1e293b; --accent: #2563eb; --text: #0f172a; --in: #22c55e; --out: #ef4444; }
+        * { box-sizing: border-box; font-family: sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        input, select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; }
+        button { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-add { background: var(--accent); color: white; width: 100%; }
+        .btn-add:hover { opacity: 0.9; }
+        table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: var(--primary); color: white; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .badge-in { background: #dcfce7; color: var(--in); }
+        .badge-out { background: #fee2e2; color: var(--out); }
+        .total-box { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem; padding: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📓 Registro de Auditoria (Cédulas)</h2>
+    
+    <div class="card">
+        <div class="form-group">
+            <input type="text" id="serie" placeholder="Número de Série">
+            <input type="number" id="valor" placeholder="Valor (Ex: 10.00)">
+            <select id="acao">
+                <option value="Entrada">+1 (Entrada)</option>
+                <option value="Saída">-1 (Saída)</option>
+            </select>
+            <input type="text" id="moeda" placeholder="Moeda (Padrão: BRL)">
+        </div>
+        <button class="btn-add" onclick="adicionar()">Registrar na Auditoria</button>
+    </div>
+
+    <div class="card">
+        <div class="total-box">
+            <span>Saldo em Conta (BRL):</span>
+            <span id="saldo-total">R$ 0,00</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Número de Série</th>
+                    <th>Valor</th>
+                    <th>Ação</th>
+                    <th>Moeda</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-corpo"></tbody>
+        </table>
+    </div>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+    <button onclick="exportarAuditoria()" style="background: #64748b; color: white; flex: 1;">📤 Exportar Backup</button>
+    <button onclick="document.getElementById('file-input').click()" style="background: #64748b; color: white; flex: 1;">📥 Importar Backup</button>
+    <input type="file" id="file-input" style="display: none;" onchange="importarAuditoria(event)">
+</div>
+</div>
+
+<script>
+    let registros = JSON.parse(localStorage.getItem('gpx_auditoria')) || [];
+
+    function adicionar() {
+        const serie = document.getElementById('serie').value;
+        const valor = parseFloat(document.getElementById('valor').value);
+        const acao = document.getElementById('acao').value;
+        const moedaInput = document.getElementById('moeda').value;
+        const moeda = moedaInput.trim() === "" ? "BRL" : moedaInput.toUpperCase();
+        const data = new Date().toLocaleDateString('pt-BR');
+
+        if (!serie || isNaN(valor)) {
+            alert("Preencha o Número de Série e o Valor!");
+            return;
+        }
+
+        const novo = { serie, valor, acao, moeda, data, ts: Date.now() };
+        registros.unshift(novo);
+        salvar();
+        limpar();
+    }
+
+    function salvar() {
+        localStorage.setItem('gpx_auditoria', JSON.stringify(registros));
+        renderizar();
+    }
+
+    function limpar() {
+        document.getElementById('serie').value = '';
+        document.getElementById('valor').value = '';
+        document.getElementById('moeda').value = '';
+    }
+
+    // --- NOVAS FUNÇÕES DE BACKUP ---
+    function exportarAuditoria() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(registros));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "auditoria_gestaopix.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+
+    function importarAuditoria(event) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importados = JSON.parse(e.target.result);
+                if (Array.isArray(importados)) {
+                    registros = importados;
+                    salvar();
+                    alert("Backup restaurado com sucesso!");
+                }
+            } catch (err) {
+                alert("Erro ao ler o arquivo de backup.");
+            }
+        };
+        reader.readAsText(event.target.files[0]);
+    }
+    // -------------------------------
+
+    function renderizar() {
+        const corpo = document.getElementById('tabela-corpo');
+        let saldoBRL = 0;
+
+        corpo.innerHTML = registros.map(r => {
+            const isEntrada = r.acao === 'Entrada';
+            if (r.moeda === 'BRL') {
+                saldoBRL += isEntrada ? r.valor : -r.valor;
+            }
+
+            return `
+                <tr>
+                    <td><code>${r.serie}</code></td>
+                    <td>${isEntrada ? '' : '-'}${r.moeda} ${r.valor.toFixed(2)}</td>
+                    <td><span class="badge ${isEntrada ? 'badge-in' : 'badge-out'}">${r.acao}</span></td>
+                    <td>${r.moeda}</td>
+                    <td>${r.data}</td>
+                </tr>
+            `;
+        }).join('');
+
+        document.getElementById('saldo-total').innerText = `R$ ${saldoBRL.toFixed(2)}`;
+    }
+
+    window.onload = renderizar;
+</script>
+
+</body>
+</html>
