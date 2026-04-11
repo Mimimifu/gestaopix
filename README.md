@@ -10,7 +10,8 @@ Você tem o backup da loja e seus clientes também ! Tudo simples e de formar lo
 
 
 Projeto de ajudo ?
-
+[Vercel](https://gestaopix.vercel.app/)
+[Render](https://gestaopix.onrender.com/)
 
 [Patreon](https://www.patreon.com/c/WorldsEcology/membership)
 
