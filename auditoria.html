@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GestãoPIX | Auditoria de Cédulas</title>
+    <title data-i18n="title">GestãoPIX | Auditoria de Cédulas</title>
     <style>
         :root { --bg: #f1f5f9; --surface: #ffffff; --primary: #1e293b; --accent: #2563eb; --text: #0f172a; --in: #22c55e; --out: #ef4444; }
         * { box-sizing: border-box; font-family: sans-serif; }
@@ -22,52 +22,178 @@
         .badge-in { background: #dcfce7; color: var(--in); }
         .badge-out { background: #fee2e2; color: var(--out); }
         .total-box { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem; padding: 10px; }
+        .lang-bar { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 15px; }
+        .lang-btn { background: var(--surface); border: 1px solid var(--primary); padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
+        .lang-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📓 Registro de Auditoria (Cédulas)</h2>
+    <div class="lang-bar">
+        <button class="lang-btn" data-lang="pt">🇧🇷 Português</button>
+        <button class="lang-btn" data-lang="en">🇺🇸 English</button>
+        <button class="lang-btn" data-lang="zh">🇨🇳 中文</button>
+    </div>
+
+    <h2 data-i18n="main_title">📓 Registro de Auditoria (Cédulas)</h2>
     
     <div class="card">
         <div class="form-group">
-            <input type="text" id="serie" placeholder="Número de Série">
-            <input type="number" id="valor" placeholder="Valor (Ex: 10.00)">
+            <input type="text" id="serie" data-i18n-placeholder="serie_placeholder" placeholder="Número de Série">
+            <input type="number" id="valor" data-i18n-placeholder="valor_placeholder" placeholder="Valor (Ex: 10.00)">
             <select id="acao">
-                <option value="Entrada">+1 (Entrada)</option>
-                <option value="Saída">-1 (Saída)</option>
+                <option value="Entrada" data-i18n="in_option">+1 (Entrada)</option>
+                <option value="Saída" data-i18n="out_option">-1 (Saída)</option>
             </select>
-            <input type="text" id="moeda" placeholder="Moeda (Padrão: BRL)">
+            <input type="text" id="moeda" data-i18n-placeholder="moeda_placeholder" placeholder="Moeda (Padrão: BRL)">
         </div>
-        <button class="btn-add" onclick="adicionar()">Registrar na Auditoria</button>
+        <button class="btn-add" onclick="adicionar()" data-i18n="add_btn">Registrar na Auditoria</button>
     </div>
 
     <div class="card">
         <div class="total-box">
-            <span>Saldo em Conta (BRL):</span>
+            <span data-i18n="balance_label">Saldo em Conta (BRL):</span>
             <span id="saldo-total">R$ 0,00</span>
         </div>
         <table>
             <thead>
                 <tr>
-                    <th>Número de Série</th>
-                    <th>Valor</th>
-                    <th>Ação</th>
-                    <th>Moeda</th>
-                    <th>Data</th>
+                    <th data-i18n="th_serie">Número de Série</th>
+                    <th data-i18n="th_valor">Valor</th>
+                    <th data-i18n="th_acao">Ação</th>
+                    <th data-i18n="th_moeda">Moeda</th>
+                    <th data-i18n="th_data">Data</th>
                 </tr>
             </thead>
             <tbody id="tabela-corpo"></tbody>
         </table>
     </div>
     <div style="display: flex; gap: 10px; margin-top: 10px;">
-    <button onclick="exportarAuditoria()" style="background: #64748b; color: white; flex: 1;">📤 Exportar Backup</button>
-    <button onclick="document.getElementById('file-input').click()" style="background: #64748b; color: white; flex: 1;">📥 Importar Backup</button>
-    <input type="file" id="file-input" style="display: none;" onchange="importarAuditoria(event)">
-</div>
+        <button onclick="exportarAuditoria()" style="background: #64748b; color: white; flex: 1;" data-i18n="export_btn">📤 Exportar Backup</button>
+        <button onclick="document.getElementById('file-input').click()" style="background: #64748b; color: white; flex: 1;" data-i18n="import_btn">📥 Importar Backup</button>
+        <input type="file" id="file-input" style="display: none;" onchange="importarAuditoria(event)">
+    </div>
 </div>
 
 <script>
+    // ===================== TRADUÇÕES =====================
+    const translations = {
+        pt: {
+            title: "GestãoPIX | Auditoria de Cédulas",
+            main_title: "📓 Registro de Auditoria (Cédulas)",
+            serie_placeholder: "Número de Série",
+            valor_placeholder: "Valor (Ex: 10.00)",
+            moeda_placeholder: "Moeda (Padrão: BRL)",
+            in_option: "+1 (Entrada)",
+            out_option: "-1 (Saída)",
+            add_btn: "Registrar na Auditoria",
+            balance_label: "Saldo em Conta (BRL):",
+            th_serie: "Número de Série",
+            th_valor: "Valor",
+            th_acao: "Ação",
+            th_moeda: "Moeda",
+            th_data: "Data",
+            export_btn: "📤 Exportar Backup",
+            import_btn: "📥 Importar Backup",
+            alert_fill: "Preencha o Número de Série e o Valor!",
+            alert_restore_ok: "Backup restaurado com sucesso!",
+            alert_restore_error: "Erro ao ler o arquivo de backup."
+        },
+        en: {
+            title: "GestãoPIX | Bill Audit",
+            main_title: "📓 Audit Log (Banknotes)",
+            serie_placeholder: "Serial Number",
+            valor_placeholder: "Amount (e.g. 10.00)",
+            moeda_placeholder: "Currency (Default: BRL)",
+            in_option: "+1 (Income)",
+            out_option: "-1 (Expense)",
+            add_btn: "Register in Audit",
+            balance_label: "Account Balance (BRL):",
+            th_serie: "Serial Number",
+            th_valor: "Amount",
+            th_acao: "Action",
+            th_moeda: "Currency",
+            th_data: "Date",
+            export_btn: "📤 Export Backup",
+            import_btn: "📥 Import Backup",
+            alert_fill: "Fill in the Serial Number and Amount!",
+            alert_restore_ok: "Backup restored successfully!",
+            alert_restore_error: "Error reading backup file."
+        },
+        zh: {
+            title: "GestãoPIX | 纸币审计",
+            main_title: "📓 审计记录（纸币）",
+            serie_placeholder: "序列号",
+            valor_placeholder: "金额（例如：10.00）",
+            moeda_placeholder: "货币（默认：BRL）",
+            in_option: "+1（收入）",
+            out_option: "-1（支出）",
+            add_btn: "登记审计",
+            balance_label: "账户余额（BRL）：",
+            th_serie: "序列号",
+            th_valor: "金额",
+            th_acao: "操作",
+            th_moeda: "货币",
+            th_data: "日期",
+            export_btn: "📤 导出备份",
+            import_btn: "📥 导入备份",
+            alert_fill: "请填写序列号和金额！",
+            alert_restore_ok: "备份恢复成功！",
+            alert_restore_error: "读取备份文件时出错。"
+        }
+    };
+
+    let currentLang = localStorage.getItem('audit_lang') || 'pt';
+
+    function applyLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem('audit_lang', lang);
+        document.documentElement.lang = lang === 'pt' ? 'pt-br' : (lang === 'en' ? 'en' : 'zh');
+
+        // Atualizar textos com data-i18n
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[lang][key]) {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+                    // Para inputs, placeholders são tratados separadamente (data-i18n-placeholder)
+                } else {
+                    el.innerText = translations[lang][key];
+                }
+            }
+        });
+
+        // Atualizar placeholders
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (translations[lang][key]) {
+                el.placeholder = translations[lang][key];
+            }
+        });
+
+        // Atualizar as opções do select (Entrada/Saída)
+        const inOption = document.querySelector('#acao option[value="Entrada"]');
+        const outOption = document.querySelector('#acao option[value="Saída"]');
+        if (inOption) inOption.innerText = translations[lang].in_option;
+        if (outOption) outOption.innerText = translations[lang].out_option;
+
+        // Atualizar título da página
+        document.title = translations[lang].title;
+    }
+
+    function setLanguage(lang) {
+        applyLanguage(lang);
+        // Marcar botão ativo
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            if (btn.getAttribute('data-lang') === lang) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    // ===================== LÓGICA DA AUDITORIA =====================
     let registros = JSON.parse(localStorage.getItem('gpx_auditoria')) || [];
 
     function adicionar() {
@@ -76,10 +202,10 @@
         const acao = document.getElementById('acao').value;
         const moedaInput = document.getElementById('moeda').value;
         const moeda = moedaInput.trim() === "" ? "BRL" : moedaInput.toUpperCase();
-        const data = new Date().toLocaleDateString('pt-BR');
+        const data = new Date().toLocaleDateString(currentLang === 'pt' ? 'pt-BR' : (currentLang === 'en' ? 'en-US' : 'zh-CN'));
 
         if (!serie || isNaN(valor)) {
-            alert("Preencha o Número de Série e o Valor!");
+            alert(translations[currentLang].alert_fill);
             return;
         }
 
@@ -100,7 +226,6 @@
         document.getElementById('moeda').value = '';
     }
 
-    // --- NOVAS FUNÇÕES DE BACKUP ---
     function exportarAuditoria() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(registros));
         const downloadAnchorNode = document.createElement('a');
@@ -119,15 +244,16 @@
                 if (Array.isArray(importados)) {
                     registros = importados;
                     salvar();
-                    alert("Backup restaurado com sucesso!");
+                    alert(translations[currentLang].alert_restore_ok);
+                } else {
+                    throw new Error();
                 }
             } catch (err) {
-                alert("Erro ao ler o arquivo de backup.");
+                alert(translations[currentLang].alert_restore_error);
             }
         };
         reader.readAsText(event.target.files[0]);
     }
-    // -------------------------------
 
     function renderizar() {
         const corpo = document.getElementById('tabela-corpo');
@@ -141,9 +267,9 @@
 
             return `
                 <tr>
-                    <td><code>${r.serie}</code></td>
+                    <td><code>${escapeHtml(r.serie)}</code></td>
                     <td>${isEntrada ? '' : '-'}${r.moeda} ${r.valor.toFixed(2)}</td>
-                    <td><span class="badge ${isEntrada ? 'badge-in' : 'badge-out'}">${r.acao}</span></td>
+                    <td><span class="badge ${isEntrada ? 'badge-in' : 'badge-out'}">${r.acao === 'Entrada' ? translations[currentLang].in_option : translations[currentLang].out_option}</span></td>
                     <td>${r.moeda}</td>
                     <td>${r.data}</td>
                 </tr>
@@ -153,7 +279,28 @@
         document.getElementById('saldo-total').innerText = `R$ ${saldoBRL.toFixed(2)}`;
     }
 
-    window.onload = renderizar;
+    // helper para evitar XSS nos números de série
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Inicialização
+    window.onload = () => {
+        // Registrar eventos dos botões de idioma
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setLanguage(btn.getAttribute('data-lang'));
+                renderizar(); // recarrega os textos dos badges (Entrada/Saída traduzidos)
+            });
+        });
+        setLanguage(currentLang);
+        renderizar();
+    };
 </script>
 
 </body>
