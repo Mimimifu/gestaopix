@@ -224,6 +224,7 @@
             <span class="txt">🏪 Admin</span>
             <button class="btn-s" style="width: 35px; padding: 5px;" onclick="document.body.classList.toggle('collapsed')">☰</button>
         </div>
+        <button class="btn-s" id="btn-language" data-i18n="lang" onclick="openM('m-languages')">🈯 <span class="txt">Idioma</span></button>
         <button class="btn-p" onclick="openEdit()">➕ <span class="txt">Novo Produto</span></button>
         <button class="btn-s" onclick="criarSala()">📡 <span class="txt">Criar Sala</span></button>
         <button class="btn-s" onclick="document.getElementById('f-in').click()">📥 <span class="txt">Importar</span></button>
@@ -353,9 +354,9 @@
         // BANCO DE DADOS
         // ============================================
         const CATALOGO_PADRAO = [
-            { id: 'prod1', name: 'Smartphone Galaxy', cat: 'Eletrônicos', price: 2999.99, pix: 'galaxy@vendas.com', img: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=300&h=300&fit=crop' },
-            { id: 'prod2', name: 'Fone Bluetooth JBL', cat: 'Eletrônicos', price: 199.90, pix: 'fone@vendas.com', img: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300&h=300&fit=crop' },
-            { id: 'prod3', name: 'Camiseta Estampada', cat: 'Moda', price: 49.90, pix: 'camiseta@vendas.com', img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop' }
+            { id: 'prod1', name: 'Exemplo Smartphone Galaxy', cat: 'Exemplo Eletrônicos', price: 2999.99, pix: 'suachavepix', img: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=300&h=300&fit=crop' },
+            { id: 'prod2', name: 'Exemplo Fone Bluetooth JBL', cat: 'Exemplo Eletrônicos', price: 199.90, pix: 'suachavepix', img: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300&h=300&fit=crop' },
+            { id: 'prod3', name: 'Exemplo Camiseta Estampada', cat: 'Exemplo Moda', price: 49.90, pix: 'suachavepix', img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop' }
         ];
 
         let db = [];
