@@ -414,9 +414,10 @@
 
     <div id="m-supabase" class="modal"><div class="modal-c">
             <h3>☁️ Configurar Supabase</h3>
-            <p style="font-size:0.8rem;color:#666;">Conecte-se ao Supabase para sincronização em tempo real</p>
-            <input type="text" id="sb-url" placeholder="URL do Supabase (ex: https://xxx.supabase.co)">
-            <input type="text" id="sb-key" placeholder="Chave anon/public (ex: eyJ...)">
+            <p style="font-size:0.8rem;color:#865;">Configuration <a href="https://github.com/Mimimifu/gestaopix/blob/main/readme-supabase-config.md">Readme.md</a></p>
+            <p style="font-size:0.8rem;color:#675;">Conecte-se ao Supabase para sincronização em tempo real</p>
+            <input type="text" id="sb-url" placeholder="URL do Supabase (ex: https://xxx.supabase.co)" value="https://mkgfmctofpspphkdbfoe.supabase.co">
+            <input type="text" id="sb-key" placeholder="Chave anon/public (ex: eyJ...)" value="sb_publishable_RVv1dbCcAZHpm5CkoQyDEw_XN4Sn665">
             <button class="btn-p" onclick="salvarConfigSupabase()">💾 Salvar e Conectar</button>
             <button class="btn-s" onclick="testarSupabase()">🔌 Testar Conexão</button>
             <button class="btn-danger btn-sm" onclick="desconectarSupabase()">⛔ Desconectar</button>
