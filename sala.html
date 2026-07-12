@@ -192,7 +192,6 @@
             <button class="btn-s" style="width: 35px; padding: 5px;" onclick="document.body.classList.toggle('collapsed')">☰</button>
         </div>
         <button class="btn-s" onclick="openM('m-join')">🌐 <span class="txt">Entrar na Sala</span></button>
-        <button class="btn-s" style="border-color: var(--primary); color: var(--primary);" onclick="configurarSupabase()">☁️ <span class="txt">Supabase</span></button>
         <button class="btn-s" onclick="toggleChat()">💬 <span class="txt">Chat</span> <span id="notif" style="display:none;color:red;">●</span></button>
         <div style="margin-top: auto; display: flex; flex-direction: column; gap: 5px;">
             <button class="btn-s" style="font-size: 0.7rem; padding:5px" onclick="toggleTheme()">🌓 <span class="txt">Tema</span></button>
@@ -236,30 +235,19 @@
 
     <div id="m-join" class="modal"><div class="modal-c">
         <h3>🌐 Entrar na Sala</h3>
-        <p style="font-size:0.8rem;color:#666;">Digite o ID da sala criada pelo lojista</p>
-        <input type="text" id="in-sala" placeholder="ID da Sala (ex: loja1)">
+        <p style="font-size:0.8rem;color:#666;">Digite o código ou ID da sala fornecido pelo lojista</p>
+        <input type="text" id="in-sala" placeholder="Código da Sala ou ID (ex: loja1)">
         <button class="btn-p" onclick="entrarSala()">🔗 Conectar</button>
         <button class="btn-s" onclick="closeM()">Cancelar</button>
-    </div></div>
-
-    <div id="m-supabase" class="modal"><div class="modal-c">
-        <h3>☁️ Configurar Supabase</h3>
-        <p style="font-size:0.8rem;color:#666;">URL e chave anon do Supabase do lojista</p>
-        <input type="text" id="sb-url" placeholder="URL (ex: https://xxx.supabase.co)">
-        <input type="text" id="sb-key" placeholder="Chave anon (ex: eyJ...)">
-        <button class="btn-p" onclick="salvarConfigSupabase()">💾 Salvar e Conectar</button>
-        <button class="btn-s" onclick="testarSupabase()">🔌 Testar</button>
-        <button class="btn-s" onclick="desconectarSupabase()">⛔ Desconectar</button>
-        <button class="btn-s" onclick="closeM()">Fechar</button>
     </div></div>
 
     <div id="m-guide" class="modal"><div class="modal-c" style="max-width:450px;">
         <h2 style="text-align:center;color:var(--primary);">📖 Como Usar</h2>
         <div style="font-size:0.9rem;display:flex;flex-direction:column;gap:12px;">
-            <section><strong>1. Entrar na Sala</strong><br>Use 🌐 e digite o ID fornecido pelo lojista.</section>
+            <section><strong>1. Entrar na Sala</strong><br>Use 🌐 e digite o código fornecido pelo lojista.</section>
             <section><strong>2. Ver Produtos</strong><br>Navegue pelo catálogo e veja os produtos.</section>
             <section><strong>3. Comprar</strong><br>Clique em 🛒 Comprar, copie a chave PIX e pague.</section>
-            <section><strong>4. Supabase</strong><br>☁️ Conecte ao Supabase do lojista para dados em tempo real.</section>
+            <section><strong>4. Chat</strong><br>Use 💬 para conversar com o lojista.</section>
         </div>
         <button class="btn-p" onclick="closeM()">Entendi!</button>
     </div></div>
@@ -282,7 +270,7 @@
         let db = [];
         let salaAtual = null;
         let supabaseClient = null;
-        let supabaseConfig = JSON.parse(localStorage.getItem('supabase_config_sala')) || null;
+        let supabaseConfig = null;
         let realtimeSubscription = null;
         let chatSubscription = null;
 
@@ -294,21 +282,74 @@
             if (saved) { db = JSON.parse(saved);
                 render();
                 updFilt(); }
+
+            // Verificar código na URL
+            const params = new URLSearchParams(window.location.search);
+            const codigo = params.get('codigo');
+
+            if (codigo) {
+                try {
+                    // Decodificar Base64
+                    const jsonStr = decodeURIComponent(escape(atob(codigo)));
+                    const dados = JSON.parse(jsonStr);
+
+                    if (dados.sala) {
+                        salaAtual = dados.sala;
+                        document.getElementById('salaBadge').textContent = `🏠 Sala: ${salaAtual}`;
+                        document.getElementById('in-sala').value = salaAtual;
+
+                        // Se tiver dados do Supabase no código, conectar automaticamente
+                        if (dados.supabase && dados.supabase.url && dados.supabase.key) {
+                            supabaseConfig = dados.supabase;
+                            localStorage.setItem('supabase_config_sala_auto', JSON.stringify(supabaseConfig));
+                            conectarSupabaseAuto();
+                        }
+
+                        entrarSala();
+                    }
+                } catch (err) {
+                    console.warn('Erro ao decodificar código:', err);
+                    // Se falhar, tenta usar como ID direto
+                    document.getElementById('in-sala').value = codigo;
+                }
+            }
+
+            // Verificar se há sala salva
             const salaSalva = localStorage.getItem('sala_atual_sala');
-            if (salaSalva) {
+            if (salaSalva && !salaAtual) {
                 salaAtual = salaSalva;
                 document.getElementById('salaBadge').textContent = `🏠 Sala: ${salaSalva}`;
-                document.getElementById('status').innerHTML = `✅ ${db.length} produtos carregados`;
+                document.getElementById('in-sala').value = salaSalva;
+                entrarSala();
             }
-            if (supabaseConfig) testarSupabase();
-            // Verificar sala na URL
-            const params = new URLSearchParams(window.location.search);
-            const salaURL = params.get('sala');
-            if (salaURL && supabaseConfig) {
-                setTimeout(() => {
-                    document.getElementById('in-sala').value = salaURL;
-                    entrarSala();
-                }, 1000);
+
+            // Verificar se há configuração Supabase automática
+            const supabaseAuto = JSON.parse(localStorage.getItem('supabase_config_sala_auto'));
+            if (supabaseAuto && !supabaseConfig) {
+                supabaseConfig = supabaseAuto;
+                conectarSupabaseAuto();
+            }
+        }
+
+        // ============================================
+        // CONECTAR SUPABASE AUTOMATICAMENTE
+        // ============================================
+        async function conectarSupabaseAuto() {
+            if (!supabaseConfig) return;
+            try {
+                const { createClient } = supabase;
+                supabaseClient = createClient(supabaseConfig.url, supabaseConfig.key);
+                const { error } = await supabaseClient.from('produtos').select('id').limit(1);
+                if (error) throw error;
+                document.getElementById('supabaseStatus').className = 'status-supabase online';
+                document.getElementById('supabaseStatus').textContent = '☁️ Online';
+                if (salaAtual) carregarDadosSupabase();
+                setupRealtime();
+                console.log('✅ Supabase conectado automaticamente!');
+            } catch (err) {
+                console.warn('⚠️ Erro ao conectar Supabase automático:', err);
+                document.getElementById('supabaseStatus').className = 'status-supabase offline';
+                document.getElementById('supabaseStatus').textContent = '☁️ Offline';
             }
         }
 
@@ -317,14 +358,14 @@
         // ============================================
         function entrarSala() {
             const sala = document.getElementById('in-sala').value.trim();
-            if (!sala) { alert('Digite o ID da sala.'); return; }
+            if (!sala) { alert('Digite o ID ou código da sala.'); return; }
             closeM();
 
             salaAtual = sala;
             localStorage.setItem('sala_atual_sala', salaAtual);
             document.getElementById('salaBadge').textContent = `🏠 Sala: ${sala}`;
 
-            // Tentar carregar do Supabase
+            // Tentar carregar do Supabase se conectado
             if (supabaseClient) {
                 carregarDadosSupabase();
             } else {
@@ -337,7 +378,7 @@
                     updFilt();
                     document.getElementById('status').innerHTML = `✅ ${db.length} produtos da sala "${sala}"`;
                 } else {
-                    document.getElementById('status').innerHTML = `⚠️ Sala "${sala}" não encontrada. Verifique o ID.`;
+                    document.getElementById('status').innerHTML = `⚠️ Sala "${sala}" não encontrada. Verifique o código.`;
                 }
             }
         }
@@ -345,57 +386,6 @@
         // ============================================
         // SUPABASE
         // ============================================
-        function configurarSupabase() {
-            if (supabaseConfig) {
-                document.getElementById('sb-url').value = supabaseConfig.url || '';
-                document.getElementById('sb-key').value = supabaseConfig.key || '';
-            }
-            openM('m-supabase');
-        }
-
-        function salvarConfigSupabase() {
-            const url = document.getElementById('sb-url').value.trim();
-            const key = document.getElementById('sb-key').value.trim();
-            if (!url || !key) { alert('Preencha URL e chave.'); return; }
-            supabaseConfig = { url, key };
-            localStorage.setItem('supabase_config_sala', JSON.stringify(supabaseConfig));
-            testarSupabase();
-            closeM();
-        }
-
-        async function testarSupabase() {
-            if (!supabaseConfig) { alert('Configure o Supabase.'); return; }
-            try {
-                const { createClient } = supabase;
-                supabaseClient = createClient(supabaseConfig.url, supabaseConfig.key);
-                const { error } = await supabaseClient.from('produtos').select('id').limit(1);
-                if (error) throw error;
-                document.getElementById('supabaseStatus').className = 'status-supabase online';
-                document.getElementById('supabaseStatus').textContent = '☁️ Online';
-                if (salaAtual) carregarDadosSupabase();
-                setupRealtime();
-                alert('✅ Conectado!');
-            } catch (err) {
-                document.getElementById('supabaseStatus').className = 'status-supabase offline';
-                document.getElementById('supabaseStatus').textContent = '☁️ Erro';
-                alert('❌ Erro: ' + err.message);
-            }
-        }
-
-        function desconectarSupabase() {
-            if (realtimeSubscription) { realtimeSubscription.unsubscribe();
-                realtimeSubscription = null; }
-            if (chatSubscription) { chatSubscription.unsubscribe();
-                chatSubscription = null; }
-            supabaseClient = null;
-            supabaseConfig = null;
-            localStorage.removeItem('supabase_config_sala');
-            document.getElementById('supabaseStatus').className = 'status-supabase offline';
-            document.getElementById('supabaseStatus').textContent = '☁️ Offline';
-            alert('⛔ Desconectado.');
-            closeM();
-        }
-
         async function carregarDadosSupabase() {
             if (!supabaseClient || !salaAtual) return;
             try {
