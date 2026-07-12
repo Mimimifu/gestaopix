@@ -103,6 +103,7 @@
         .btn-s { background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 5px; }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
         .btn-sm { padding: 4px 10px; font-size: 0.75rem; width: auto; }
 
         .modal {
@@ -120,7 +121,7 @@
             padding: 20px;
             border-radius: 12px;
             width: 100%;
-            max-width: 350px;
+            max-width: 400px;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -173,6 +174,32 @@
             background: var(--surface);
             border-color: var(--success);
         }
+        .code-display {
+            background: var(--bg);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.7rem;
+            word-break: break-all;
+            border: 1px solid var(--border);
+            max-height: 150px;
+            overflow-y: auto;
+            user-select: all;
+        }
+        .btn-copy-code {
+            background: var(--success);
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-copy-code:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
         @media (max-width: 600px) {
             aside {
                 position: fixed;
@@ -215,6 +242,7 @@
         <div class="header">
             <input type="text" id="srch" placeholder="Buscar..." style="flex:2" oninput="render()">
             <select id="filt" style="flex:1" onchange="render()"><option>Tudo</option></select>
+            <button class="btn-success btn-sm" onclick="gerarCodigoSala()">🔗 <span class="txt">Copiar Link da Sala</span></button>
             <span id="supabaseStatus" class="status-supabase offline">☁️ Offline</span>
             <span class="role-badge admin">👑 Admin</span>
             <span id="salaBadge" class="sala-info">🏠 Sala: local</span>
@@ -267,12 +295,20 @@
         <button class="btn-s" onclick="closeM()">Fechar</button>
     </div></div>
 
+    <div id="m-codigo" class="modal"><div class="modal-c">
+        <h3>🔗 Link da Sala</h3>
+        <p style="font-size:0.8rem;color:#666;">Copie este link e compartilhe com seus clientes</p>
+        <div class="code-display" id="codigoGerado">Carregando...</div>
+        <button class="btn-copy-code" onclick="copiarCodigo()">📋 Copiar Link</button>
+        <button class="btn-s" onclick="closeM()">Fechar</button>
+    </div></div>
+
     <div id="m-guide" class="modal"><div class="modal-c" style="max-width:450px;">
         <h2 style="text-align:center;color:var(--primary);">📖 Como Usar</h2>
         <div style="font-size:0.9rem;display:flex;flex-direction:column;gap:12px;">
             <section><strong>1. Produtos</strong><br>Use ➕ para adicionar produtos com nome, preço e chave PIX.</section>
             <section><strong>2. Sala</strong><br>Use 📡 para criar uma sala. O nome vira o ID para clientes.</section>
-            <section><strong>3. Exportar</strong><br>📤 Gera um arquivo .json com seu catálogo.</section>
+            <section><strong>3. Compartilhar</strong><br>Clique em 🔗 Copiar Link da Sala e envie para seus clientes.</section>
             <section><strong>4. Supabase</strong><br>☁️ Opcional - conecte para sincronização em tempo real.</section>
         </div>
         <button class="btn-p" onclick="closeM()">Entendi!</button>
@@ -323,6 +359,50 @@
         }
 
         // ============================================
+        // GERAR CÓDIGO DA SALA (BASE64)
+        // ============================================
+        function gerarCodigoSala() {
+            if (salaAtual === 'local' || !salaAtual) {
+                alert('⚠️ Crie uma sala primeiro! Use 📡 Criar Sala.');
+                return;
+            }
+
+            // Coletar dados para o código
+            const dadosSala = {
+                sala: salaAtual,
+                url: window.location.origin,
+                supabase: supabaseConfig || null
+            };
+
+            // Codificar em Base64
+            const jsonStr = JSON.stringify(dadosSala);
+            const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+
+            // Montar link completo
+            const linkCompleto = `${window.location.origin}/sala.html?codigo=${base64}`;
+
+            // Mostrar no modal
+            document.getElementById('codigoGerado').textContent = linkCompleto;
+            openM('m-codigo');
+        }
+
+        function copiarCodigo() {
+            const codigo = document.getElementById('codigoGerado').textContent;
+            navigator.clipboard.writeText(codigo).then(() => {
+                alert('✅ Link copiado! Compartilhe com seus clientes.');
+            }).catch(() => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = codigo;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('✅ Link copiado!');
+            });
+        }
+
+        // ============================================
         // SALAS
         // ============================================
         function criarSala() {
@@ -339,7 +419,7 @@
             db = salasData[nome];
             localStorage.setItem('gpx_db_admin', JSON.stringify(db));
             render(); updFilt();
-            alert(`✅ Sala "${nome}" criada!`);
+            alert(`✅ Sala "${nome}" criada! Clique em 🔗 Copiar Link da Sala para compartilhar.`);
         }
 
         // ============================================
