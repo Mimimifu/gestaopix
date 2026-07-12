@@ -286,6 +286,7 @@
 
     <div id="m-supabase" class="modal"><div class="modal-c">
         <h3>☁️ Configurar Supabase</h3>
+        <p style="font-size:0.8rem;color:#865;">Configuração <a href="https://github.com/Mimimifu/gestaopix/blob/main/readme-supabase-config.md">Readme.md</a></p>
         <p style="font-size:0.8rem;color:#666;">URL e chave anon do seu projeto Supabase</p>
         <input type="text" id="sb-url" placeholder="URL (ex: https://xxx.supabase.co)">
         <input type="text" id="sb-key" placeholder="Chave anon (ex: eyJ...)">
@@ -296,23 +297,45 @@
     </div></div>
 
     <div id="m-codigo" class="modal"><div class="modal-c">
-        <h3>🔗 Link da Sala</h3>
-        <p style="font-size:0.8rem;color:#666;">Copie este link e compartilhe com seus clientes</p>
-        <div class="code-display" id="codigoGerado">Carregando...</div>
-        <button class="btn-copy-code" onclick="copiarCodigo()">📋 Copiar Link</button>
-        <button class="btn-s" onclick="closeM()">Fechar</button>
-    </div></div>
-
-    <div id="m-guide" class="modal"><div class="modal-c" style="max-width:450px;">
-        <h2 style="text-align:center;color:var(--primary);">📖 Como Usar</h2>
-        <div style="font-size:0.9rem;display:flex;flex-direction:column;gap:12px;">
-            <section><strong>1. Produtos</strong><br>Use ➕ para adicionar produtos com nome, preço e chave PIX.</section>
-            <section><strong>2. Sala</strong><br>Use 📡 para criar uma sala. O nome vira o ID para clientes.</section>
-            <section><strong>3. Compartilhar</strong><br>Clique em 🔗 Copiar Link da Sala e envie para seus clientes.</section>
-            <section><strong>4. Supabase</strong><br>☁️ Opcional - conecte para sincronização em tempo real.</section>
+            <h3>🔗 Link da Sala</h3>
+            <p style="font-size:0.8rem;color:#333;">Configuração <a href="https://github.com/Mimimifu/gestaopix/blob/main/readme-supabase-config.md">Readme.md</a></p>
+            <p style="font-size:0.8rem;color:#833;">Copie este link e compartilhe com seus clientes</p>
+            <div class="code-display" id="codigoGerado">Carregando...</div>
+            <button class="btn-copy-code" onclick="copiarCodigo()">📋 Copiar Link</button>
+            <button class="btn-s" onclick="closeM()">Fechar</button>
         </div>
-        <button class="btn-p" onclick="closeM()">Entendi!</button>
-    </div></div>
+    </div>
+    
+    <div id="m-guide" class="modal">
+        <div class="modal-c" style="max-width: 450px;">
+            <h2 style="text-align: center; color: var(--primary); margin-bottom: 20px;" data-i18n="guide_title">Guia GestãoPIX</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px; font-size: 0.9rem;">
+                Configuration <a href="https://github.com/Mimimifu/gestaopix/blob/main/readme-supabase-config.md">Readme.md</a>
+                <section style="border-left: 3px solid var(--primary); padding-left: 10px;">
+                    <strong data-i18n="guide_step2_title">1. Crie uma Sala</strong><br>
+                    <span data-i18n="guide_step2_desc">Use o botão 📡 para criar uma sala no Supabase, coloque o nome e solicite que o cliente entre na mesma sala.</span>
+                </section>
+                <section style="border-left: 3px solid var(--primary); padding-left: 10px;">
+                    <strong data-i18n="guide_step1_title">2. Crie seu Catálogo</strong><br>
+                    <span data-i18n="guide_step1_desc">Use o botão ➕ para cadastrar seus produtos, fotos, preços e sua chave PIX. Tudo fica salvo no seu celular.</span>
+                </section>
+                <section style="border-left: 3px solid #2ecc71; padding-left: 10px;">
+                    <strong data-i18n="guide_step3_title">3. Exportar (Sua Loja no Arquivo)</strong><br>
+                    <span data-i18n="guide_step3_desc">Clique em 📤 Exportar. O sistema gera um arquivo .json. Esse arquivo é a sua loja. Mande ele pelo WhatsApp ou E-mail para o seu cliente.</span>
+                </section>
+                <section style="border-left: 3px solid #f1c40f; padding-left: 10px;">
+                    <strong data-i18n="guide_step4_title">4. Importar (O Cliente vê)</strong><br>
+                    <span data-i18n="guide_step4_desc">O cliente abre o site e clica em 📥 Importar. Ao selecionar o seu arquivo, ele verá seus produtos e o botão de comprar.</span>
+                </section>
+                <section style="border-left: 3px solid #e74c3c; padding-left: 10px;">
+                    <strong data-i18n="guide_step5_title">5. Venda Direta</strong><br>
+                    <span data-i18n="guide_step5_desc">O cliente clica em comprar, copia sua chave e te paga. Sem intermediários, sem taxas, sem demora.</span>
+                </section>
+            </div>
+            <button class="btn-p" style="margin-top: 20px;" data-i18n="guide_close" onclick="closeM()">Entendi, vamos vender!</button>
+        </div>
+    </div>
+
 
     <div id="m-donate" class="modal"><div class="modal-c" style="text-align:center;">
         <h3>❤️ Apoiar</h3>
