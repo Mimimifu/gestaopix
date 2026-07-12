@@ -265,8 +265,12 @@
 
     <script>
         // ============================================
-        // BANCO DE DADOS
+        // BANCO DE DADOS - UNIFICADO
         // ============================================
+        // IMPORTANTE: Usar as MESMAS chaves do admin
+        const STORAGE_KEY = 'gpx_db_admin';  // ← MESMA chave do admin
+        const SALAS_KEY = 'salas_locais_admin'; // ← MESMA chave do admin
+
         let db = [];
         let salaAtual = null;
         let supabaseClient = null;
@@ -278,10 +282,14 @@
         // INICIALIZAÇÃO
         // ============================================
         function init() {
-            const saved = localStorage.getItem('gpx_db_sala');
-            if (saved) { db = JSON.parse(saved);
+            // Tentar carregar dados do admin
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved && JSON.parse(saved).length > 0) {
+                db = JSON.parse(saved);
                 render();
-                updFilt(); }
+                updFilt();
+                console.log('📦 Dados carregados do admin:', db.length, 'produtos');
+            }
 
             // Verificar código na URL
             const params = new URLSearchParams(window.location.search);
@@ -289,7 +297,6 @@
 
             if (codigo) {
                 try {
-                    // Decodificar Base64
                     const jsonStr = decodeURIComponent(escape(atob(codigo)));
                     const dados = JSON.parse(jsonStr);
 
@@ -298,7 +305,6 @@
                         document.getElementById('salaBadge').textContent = `🏠 Sala: ${salaAtual}`;
                         document.getElementById('in-sala').value = salaAtual;
 
-                        // Se tiver dados do Supabase no código, conectar automaticamente
                         if (dados.supabase && dados.supabase.url && dados.supabase.key) {
                             supabaseConfig = dados.supabase;
                             localStorage.setItem('supabase_config_sala_auto', JSON.stringify(supabaseConfig));
@@ -309,7 +315,6 @@
                     }
                 } catch (err) {
                     console.warn('Erro ao decodificar código:', err);
-                    // Se falhar, tenta usar como ID direto
                     document.getElementById('in-sala').value = codigo;
                 }
             }
@@ -323,12 +328,15 @@
                 entrarSala();
             }
 
-            // Verificar se há configuração Supabase automática
             const supabaseAuto = JSON.parse(localStorage.getItem('supabase_config_sala_auto'));
             if (supabaseAuto && !supabaseConfig) {
                 supabaseConfig = supabaseAuto;
                 conectarSupabaseAuto();
             }
+
+            console.log('🚀 Sala iniciada!');
+            console.log(`🏠 Sala: ${salaAtual || 'nenhuma'}`);
+            console.log(`📦 ${db.length} produtos carregados`);
         }
 
         // ============================================
@@ -347,14 +355,14 @@
                 setupRealtime();
                 console.log('✅ Supabase conectado automaticamente!');
             } catch (err) {
-                console.warn('⚠️ Erro ao conectar Supabase automático:', err);
+                console.warn('⚠️ Erro ao conectar Supabase:', err);
                 document.getElementById('supabaseStatus').className = 'status-supabase offline';
                 document.getElementById('supabaseStatus').textContent = '☁️ Offline';
             }
         }
 
         // ============================================
-        // SALAS
+        // SALAS - CARREGAR DO ADMIN
         // ============================================
         function entrarSala() {
             const sala = document.getElementById('in-sala').value.trim();
@@ -365,20 +373,42 @@
             localStorage.setItem('sala_atual_sala', salaAtual);
             document.getElementById('salaBadge').textContent = `🏠 Sala: ${sala}`;
 
-            // Tentar carregar do Supabase se conectado
-            if (supabaseClient) {
-                carregarDadosSupabase();
+            // TENTAR CARREGAR DO ADMIN (LOCAL)
+            const salasData = JSON.parse(localStorage.getItem(SALAS_KEY) || '{}');
+            console.log('📂 Salas disponíveis:', Object.keys(salasData));
+
+            if (salasData[sala]) {
+                db = salasData[sala];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+                render();
+                updFilt();
+                document.getElementById('status').innerHTML = `✅ ${db.length} produtos da sala "${sala}" (local)`;
+                console.log(`✅ ${db.length} produtos carregados da sala "${sala}"`);
             } else {
-                // Tentar carregar do localStorage
-                const salasData = JSON.parse(localStorage.getItem('salas_locais_sala') || '{}');
-                if (salasData[sala]) {
-                    db = salasData[sala];
-                    localStorage.setItem('gpx_db_sala', JSON.stringify(db));
-                    render();
-                    updFilt();
-                    document.getElementById('status').innerHTML = `✅ ${db.length} produtos da sala "${sala}"`;
+                document.getElementById('status').innerHTML = `⚠️ Sala "${sala}" não encontrada localmente.`;
+                console.warn(`⚠️ Sala "${sala}" não encontrada em:`, Object.keys(salasData));
+
+                // Se tiver Supabase, tentar carregar de lá
+                if (supabaseClient) {
+                    document.getElementById('status').innerHTML = `🔄 Buscando sala "${sala}" no Supabase...`;
+                    carregarDadosSupabase();
                 } else {
-                    document.getElementById('status').innerHTML = `⚠️ Sala "${sala}" não encontrada. Verifique o código.`;
+                    // Criar sala vazia se não existir
+                    if (confirm(`Sala "${sala}" não encontrada. Deseja criá-la com produtos de exemplo?`)) {
+                        const CATALOGO_PADRAO = [
+                            { id: 'prod1', name: 'Smartphone Galaxy', cat: 'Eletrônicos', price: 2999.99, pix: 'galaxy@vendas.com', img: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=300&h=300&fit=crop' },
+                            { id: 'prod2', name: 'Fone Bluetooth JBL', cat: 'Eletrônicos', price: 199.90, pix: 'fone@vendas.com', img: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300&h=300&fit=crop' },
+                            { id: 'prod3', name: 'Camiseta Estampada', cat: 'Moda', price: 49.90, pix: 'camiseta@vendas.com', img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop' }
+                        ];
+                        salasData[sala] = JSON.parse(JSON.stringify(CATALOGO_PADRAO));
+                        localStorage.setItem(SALAS_KEY, JSON.stringify(salasData));
+                        db = salasData[sala];
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+                        render();
+                        updFilt();
+                        document.getElementById('status').innerHTML = `✅ Sala "${sala}" criada com produtos de exemplo!`;
+                        alert(`✅ Sala "${sala}" criada com produtos de exemplo!`);
+                    }
                 }
             }
         }
@@ -389,7 +419,7 @@
         async function carregarDadosSupabase() {
             if (!supabaseClient || !salaAtual) return;
             try {
-                document.getElementById('status').innerHTML = '🔄 Carregando...';
+                document.getElementById('status').innerHTML = '🔄 Carregando do Supabase...';
                 const { data, error } = await supabaseClient
                     .from('produtos')
                     .select('*')
@@ -399,16 +429,21 @@
 
                 if (data && data.length > 0) {
                     db = data;
-                    localStorage.setItem('gpx_db_sala', JSON.stringify(db));
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+                    // Salvar também na lista de salas
+                    const salasData = JSON.parse(localStorage.getItem(SALAS_KEY) || '{}');
+                    salasData[salaAtual] = db;
+                    localStorage.setItem(SALAS_KEY, JSON.stringify(salasData));
                     render();
                     updFilt();
-                    document.getElementById('status').innerHTML = `✅ ${db.length} produtos da sala "${salaAtual}"`;
+                    document.getElementById('status').innerHTML = `✅ ${db.length} produtos do Supabase (sala: ${salaAtual})`;
+                    console.log(`✅ ${db.length} produtos carregados do Supabase`);
                 } else {
-                    document.getElementById('status').innerHTML = `📭 Nenhum produto na sala "${salaAtual}"`;
+                    document.getElementById('status').innerHTML = `📭 Nenhum produto na sala "${salaAtual}" no Supabase`;
                 }
             } catch (err) {
-                console.error('❌ Erro:', err);
-                document.getElementById('status').innerHTML = '❌ Erro ao carregar dados';
+                console.error('❌ Erro ao carregar do Supabase:', err);
+                document.getElementById('status').innerHTML = '❌ Erro ao carregar dados do Supabase';
             }
         }
 
@@ -425,7 +460,7 @@
                     table: 'produtos',
                     filter: `sala_id=eq.${salaAtual}`
                 }, () => {
-                    console.log('🔄 Mudança detectada');
+                    console.log('🔄 Mudança detectada no Supabase');
                     carregarDadosSupabase();
                 })
                 .subscribe();
