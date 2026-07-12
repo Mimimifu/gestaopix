@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GestãoPIX | Venda sem Taxas</title>
+    <style>
+        /* ============================================
+           RESET E BASE
+        ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f1f5f9;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #8b5cf6;
+            --success: #22c55e;
+            --gradient: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ============================================
+           ANIMAÇÕES
+        ============================================ */
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% center;
+            }
+            100% {
+                background-position: 200% center;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ============================================
+           BACKGROUND ANIMADO
+        ============================================ */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .bg-animation .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .bg-animation .orb:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .bg-animation .orb:nth-child(2) {
+            width: 350px;
+            height: 350px;
+            background: var(--secondary);
+            bottom: -50px;
+            right: -50px;
+            animation-delay: 2s;
+        }
+
+        .bg-animation .orb:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            background: #ec4899;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 4s;
+        }
+
+        /* ============================================
+           HEADER
+        ============================================ */
+        .header {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: gradientMove 4s ease infinite;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            -webkit-text-fill-color: initial;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            transition: 0.3s;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            background: var(--glass);
+        }
+
+        .nav-links .btn-nav {
+            background: var(--gradient);
+            color: white;
+            opacity: 1;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 50px;
+            transition: 0.3s;
+            -webkit-text-fill-color: white;
+        }
+
+        .nav-links .btn-nav:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+            background-size: 200% 200%;
+            animation: gradientMove 2s ease infinite;
+        }
+
+        /* ============================================
+           HERO
+        ============================================ */
+        .hero {
+            width: 100%;
+            max-width: 1200px;
+            padding: 40px 30px 60px;
+            z-index: 10;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            color: var(--success);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hero-badge .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+
+        .hero h1 .highlight {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: gradientMove 4s ease infinite;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.7;
+            max-width: 600px;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-hero {
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-hero-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-hero-secondary {
+            background: var(--glass);
+            color: var(--text);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-hero-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .btn-hero-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-hero-success:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 0 40px rgba(34, 197, 94, 0.3);
+        }
+
+        /* ============================================
+           FEATURES
+        ============================================ */
+        .features {
+            width: 100%;
+            max-width: 1200px;
+            padding: 60px 30px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px 24px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out both;
+        }
+
+        .feature-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+        .feature-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .feature-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+        .feature-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary);
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           DECENTRALIZADO
+        ============================================ */
+        .decentralized {
+            width: 100%;
+            max-width: 1200px;
+            padding: 40px 30px 60px;
+            z-index: 10;
+            position: relative;
+            text-align: center;
+        }
+
+        .decentralized h2 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .decentralized p {
+            opacity: 0.7;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.8;
+        }
+
+        .decentralized-badges {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .badge-item {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .badge-item .icon {
+            font-size: 1.5rem;
+        }
+
+        /* ============================================
+           FOOTER
+        ============================================ */
+        .footer {
+            width: 100%;
+            max-width: 1200px;
+            padding: 30px;
+            z-index: 10;
+            position: relative;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 0.85rem;
+            opacity: 0.5;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: var(--text);
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+        }
+
+        /* ============================================
+           RESPONSIVE
+        ============================================ */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+
+            .btn-hero {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 24px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .decentralized h2 {
+                font-size: 1.8rem;
+            }
+
+            .footer {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .nav-links a {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================
+    BACKGROUND ANIMADO
+    ============================================ -->
+    <div class="bg-animation">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+
+    <!-- ============================================
+    HEADER
+    ============================================ -->
+    <header class="header">
+        <div class="logo">
+            <span class="logo-icon">🏪</span>
+            Gestão<span style="-webkit-text-fill-color:initial;color:var(--primary);">PIX</span>
+        </div>
+        <nav class="nav-links">
+            <a href="#features">Como Usar</a>
+            <a href="#decentralized">Decentralizado</a>
+            <a href="sala.html" class="btn-nav">🌐 Entrar na Sala</a>
+            <a href="admin.html" class="btn-nav" style="background:var(--success);">👑 Admin</a>
+        </nav>
+    </header>
+
+    <!-- ============================================
+    HERO
+    ============================================ -->
+    <section class="hero">
+        <div class="hero-badge">
+            <span class="dot"></span>
+            🚀 100% Gratuito · Sem Taxas · Decentralizado
+        </div>
+
+        <h1>
+            Venda sem taxas com
+            <br>
+            <span class="highlight">GestãoPIX</span>
+        </h1>
+
+        <p>
+            Crie seu catálogo de produtos, compartilhe com clientes e receba pagamentos
+            via PIX diretamente na sua conta. <strong>Sem intermediários, sem mensalidades.</strong>
+        </p>
+
+        <div class="hero-buttons">
+            <a href="sala.html" class="btn-hero btn-hero-primary">
+                🛍️ Entrar na Sala
+            </a>
+            <a href="admin.html" class="btn-hero btn-hero-success">
+                👑 Administrar Loja
+            </a>
+            <a href="#features" class="btn-hero btn-hero-secondary">
+                📖 Como Usar
+            </a>
+        </div>
+    </section>
+
+    <!-- ============================================
+    FEATURES
+    ============================================ -->
+    <section class="features" id="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">📦</span>
+                <h3>Catálogo Digital</h3>
+                <p>Adicione produtos com fotos, preços e sua chave PIX. Tudo salvo localmente.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🌐</span>
+                <h3>Salas Privadas</h3>
+                <p>Crie salas para cada loja ou revendedor. Cada sala tem seu próprio catálogo.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">☁️</span>
+                <h3>Supabase Realtime</h3>
+                <p>Sincronização em tempo real opcional. Dados atualizados instantaneamente.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🔒</span>
+                <h3>Privacidade Total</h3>
+                <p>Seus dados ficam no seu dispositivo. Você controla tudo, sem depender de terceiros.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    DECENTRALIZADO
+    ============================================ -->
+    <section class="decentralized" id="decentralized">
+        <h2>🌍 Decentralizado por Natureza</h2>
+        <p>
+            O GestãoPIX foi criado para ser <strong>100% descentralizado</strong>.
+            Você não depende de servidores centrais, não paga taxas e mantém o controle
+            total sobre seus dados e negócios.
+        </p>
+        <div class="decentralized-badges">
+            <div class="badge-item">
+                <span class="icon">📁</span>
+                Dados no seu dispositivo
+            </div>
+            <div class="badge-item">
+                <span class="icon">💳</span>
+                PIX direto para sua conta
+            </div>
+            <div class="badge-item">
+                <span class="icon">🔗</span>
+                P2P via Supabase (opcional)
+            </div>
+            <div class="badge-item">
+                <span class="icon">🧅</span>
+                Compatível com rede Tor
+            </div>
+            <div class="badge-item">
+                <span class="icon">📤</span>
+                Exporte seu catálogo
+            </div>
+            <div class="badge-item">
+                <span class="icon">🆓</span>
+                100% Gratuito
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    FOOTER
+    ============================================ -->
+    <footer class="footer">
+        <span>🏪 GestãoPIX · 2025 · Feito com ❤️ para vendedores independentes</span>
+        <div class="footer-links">
+            <a href="https://github.com/Mimimifu/gestaopix" target="_blank">GitHub</a>
+            <a href="#" onclick="alert('💬 Suporte: gestaopix@email.com')">Suporte</a>
+            <a href="#" onclick="alert('❤️ PIX: 2c04642f-fbb7-40b0-9efb-434184b133f4')">Apoiar</a>
+        </div>
+    </footer>
+
+</body>
+</html>
