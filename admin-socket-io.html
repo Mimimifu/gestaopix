@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GestãoPIX | Admin</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --primary: #2563eb;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f1f5f9;
+            --border: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); overflow: hidden; transition: 0.3s; }
+        body { font-family: sans-serif; display: flex; flex-direction: row; }
+        body.menu-right { flex-direction: row-reverse; }
+
+        aside {
+            width: 240px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            z-index: 100;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        body.menu-right aside { border-right: none; border-left: 1px solid var(--border); }
+        body.collapsed aside { width: 60px; padding: 10px; }
+        body.collapsed .txt { display: none; }
+
+        main {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            background: var(--surface);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        input, select {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .card img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #eee;
+        }
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            padding: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: 0.2s;
+        }
+        .btn-p { background: var(--primary); color: white; width: 100%; }
+        .btn-s { background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 5px; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-sm { padding: 4px 10px; font-size: 0.75rem; width: auto; }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 10px;
+        }
+        .modal-c {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .status-socket {
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        .status-socket.online { background: var(--success); color: white; }
+        .status-socket.offline { background: var(--danger); color: white; }
+        .status-socket.conectando { background: var(--warning); color: white; }
+        .role-badge {
+            font-size: 0.7rem;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .role-badge.admin { background: var(--primary); color: white; }
+        .sala-info {
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: var(--border);
+            color: var(--text);
+        }
+        .realtime-badge {
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: var(--warning);
+            color: white;
+        }
+        .realtime-badge.online {
+            background: var(--success);
+            color: white;
+        }
+        .pix-key-display {
+            background: var(--bg);
+            padding: 12px;
+            border: 2px dashed var(--primary);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            word-break: break-all;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+        }
+        .code-display {
+            background: var(--bg);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.7rem;
+            word-break: break-all;
+            border: 1px solid var(--border);
+            max-height: 150px;
+            overflow-y: auto;
+            user-select: all;
+        }
+        .btn-copy-code {
+            background: var(--success);
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-copy-code:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+        @media (max-width: 600px) {
+            aside {
+                position: fixed;
+                bottom: 0;
+                width: 100% !important;
+                height: 60px;
+                flex-direction: row;
+                border: none;
+                border-top: 1px solid var(--border);
+                padding: 5px;
+                justify-content: space-around;
+            }
+            main { padding-bottom: 70px; }
+            .txt, .nav-head { display: none !important; }
+        }
+    </style>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <aside id="menu">
+        <div class="nav-head" style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <span class="txt">🏪 Admin</span>
+            <button class="btn-s" style="width: 35px; padding: 5px;" onclick="document.body.classList.toggle('collapsed')">☰</button>
+        </div>
+        <button class="btn-p" onclick="openEdit()">➕ <span class="txt">Novo Produto</span></button>
+        <button class="btn-s" onclick="criarSala()">📡 <span class="txt">Criar Sala</span></button>
+        <button class="btn-s" onclick="document.getElementById('f-in').click()">📥 <span class="txt">Importar</span></button>
+        <button class="btn-s" onclick="exportData()">📤 <span class="txt">Exportar</span></button>
+        <input type="file" id="f-in" style="display:none" onchange="importData(event)">
+        <button class="btn-success btn-sm" onclick="gerarCodigoSala()">🔗 <span class="txt">Copiar Link da Sala</span></button>
+        <button class="btn-s" onclick="toggleChat()">💬 <span class="txt">Chat</span> <span id="notif" style="display:none; color:red">●</span></button>
+        <div style="margin-top: auto; display: flex; flex-direction: column; gap: 5px;">
+            <button class="btn-s" style="font-size: 0.7rem; padding:5px" onclick="toggleTheme()">🌓 <span class="txt">Tema</span></button>
+            <button class="btn-s" style="font-size: 0.7rem; padding:5px" onclick="toggleSide()">↔️ <span class="txt">Lado</span></button>
+            <button class="btn-s" style="border-color: var(--success); color: var(--success);" onclick="openM('m-guide')">📖 <span class="txt">Como Usar</span></button>
+            <button class="btn-s" style="color: #e91e63; border-color: #f8bbd0;" onclick="openM('m-donate')">❤️ <span class="txt">Apoiar</span></button>
+        </div>
+    </aside>
+    <main>
+        <div class="header">
+            <input type="text" id="srch" placeholder="Buscar..." style="flex:2" oninput="render()">
+            <select id="filt" style="flex:1" onchange="render()"><option>Tudo</option></select>
+            <span id="socketStatus" class="status-socket offline">🔌 Offline</span>
+            <span class="role-badge admin">👑 Admin</span>
+            <span id="salaBadge" class="sala-info">🏠 Sala: local</span>
+            <span id="realtimeBadge" class="realtime-badge">📡 Local</span>
+        </div>
+        <div id="status" style="font-size: 0.6rem; color: var(--primary); margin-bottom: 10px;">Modo Local</div>
+        <div class="grid" id="list"></div>
+    </main>
+
+    <!-- Chat -->
+    <div id="chat-win" style="position:fixed;bottom:80px;right:20px;width:280px;height:300px;background:var(--surface);border:1px solid var(--border);border-radius:12px;display:none;flex-direction:column;z-index:2000;">
+        <div style="padding:10px;border-bottom:1px solid var(--border);font-weight:bold;display:flex;justify-content:space-between;">
+            <span>💬 Suporte</span> <span onclick="toggleChat()" style="cursor:pointer">×</span>
+        </div>
+        <div id="msgs" style="flex:1;padding:10px;overflow-y:auto;"></div>
+        <div style="padding:10px;display:flex;gap:5px;">
+            <input type="text" id="chat-i" placeholder="Mensagem..." style="flex:1;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;" onkeypress="if(event.key==='Enter') sendChat()">
+            <button onclick="sendChat()" style="background:var(--primary);color:white;padding:6px 12px;border-radius:6px;border:none;">➤</button>
+        </div>
+    </div>
+
+    <!-- Modais -->
+    <div id="m-edit" class="modal"><div class="modal-c">
+        <h3>📦 Produto</h3>
+        <input type="hidden" id="e-id">
+        <input type="text" id="e-n" placeholder="Nome do produto">
+        <input type="text" id="e-c" placeholder="Categoria">
+        <input type="number" id="e-p" placeholder="Preço (R$)" step="0.01">
+        <input type="text" id="e-x" placeholder="Sua chave PIX">
+        <input type="file" id="e-i" accept="image/*">
+        <button class="btn-p" onclick="save()">💾 Salvar</button>
+        <button class="btn-s" onclick="closeM()">Sair</button>
+    </div></div>
+
+    <div id="m-pay" class="modal"><div class="modal-c">
+        <h3 id="p-n">Produto:</h3>
+        <div class="pix-key-display" id="p-x" onclick="copyPix()">Chave PIX</div>
+        <h2 id="p-p" style="color:var(--primary);text-align:center">R$ 0,00</h2>
+        <button class="btn-s" onclick="closeM()">Fechar</button>
+    </div></div>
+
+    <div id="m-codigo" class="modal"><div class="modal-c">
+        <h3>🔗 Link da Sala</h3>
+        <p style="font-size:0.8rem;color:#666;">Copie este link e compartilhe com seus clientes</p>
+        <div class="code-display" id="codigoGerado">Carregando...</div>
+        <button class="btn-copy-code" onclick="copiarCodigo()">📋 Copiar Link</button>
+        <button class="btn-s" onclick="closeM()">Fechar</button>
+    </div></div>
+
+    <div id="m-guide" class="modal"><div class="modal-c" style="max-width:450px;">
+        <h2 style="text-align:center;color:var(--primary);">📖 Como Usar</h2>
+        <div style="font-size:0.9rem;display:flex;flex-direction:column;gap:12px;">
+            <section><strong>1. Produtos</strong><br>Use ➕ para adicionar produtos com nome, preço e chave PIX.</section>
+            <section><strong>2. Sala</strong><br>Use 📡 para criar uma sala. O nome vira o ID para clientes.</section>
+            <section><strong>3. Compartilhar</strong><br>Clique em 🔗 Copiar Link da Sala e envie para seus clientes.</section>
+            <section><strong>4. Chat</strong><br>Use 💬 para conversar com os clientes em tempo real.</section>
+        </div>
+        <button class="btn-p" onclick="closeM()">Entendi!</button>
+    </div></div>
+
+    <div id="m-donate" class="modal"><div class="modal-c" style="text-align:center;">
+        <h3>❤️ Apoiar</h3>
+        <a href="https://www.patreon.com/c/WorldsEcology/membership" target="_blank" style="display:block;padding:10px;border:1px solid var(--border);border-radius:8px;margin:8px 0;text-decoration:none;color:inherit;">Patreon</a>
+        <a href="https://ko-fi.com/lbzcds" target="_blank" style="display:block;padding:10px;border:1px solid var(--border);border-radius:8px;margin:8px 0;text-decoration:none;color:inherit;">Ko-fi</a>
+        <div style="padding:12px;border:2px dashed var(--primary);border-radius:8px;">
+            <strong>PIX</strong>
+            <div class="pix-key-display" style="font-size:0.7rem;padding:8px;margin-top:8px;" onclick="copyDevPix()">2c04642f-fbb7-40b0-9efb-434184b133f4</div>
+        </div>
+        <button class="btn-s" onclick="closeM()">Fechar</button>
+    </div></div>
+
+    <script>
+        // ============================================
+        // BANCO DE DADOS
+        // ============================================
+        const CATALOGO_PADRAO = [
+            { id: 'prod1', name: 'Smartphone Galaxy', cat: 'Eletrônicos', price: 2999.99, pix: 'galaxy@vendas.com', img: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=300&h=300&fit=crop' },
+            { id: 'prod2', name: 'Fone Bluetooth JBL', cat: 'Eletrônicos', price: 199.90, pix: 'fone@vendas.com', img: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300&h=300&fit=crop' },
+            { id: 'prod3', name: 'Camiseta Estampada', cat: 'Moda', price: 49.90, pix: 'camiseta@vendas.com', img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop' }
+        ];
+
+        let db = [];
+        let salaAtual = localStorage.getItem('sala_atual_admin') || 'local';
+        let socket = null;
+        let isAdmin = true;
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        function init() {
+            const saved = localStorage.getItem('gpx_db_admin');
+            if (saved && JSON.parse(saved).length > 0) {
+                db = JSON.parse(saved);
+            } else {
+                db = JSON.parse(JSON.stringify(CATALOGO_PADRAO));
+                localStorage.setItem('gpx_db_admin', JSON.stringify(db));
+            }
+
+            document.getElementById('salaBadge').textContent = `🏠 Sala: ${salaAtual}`;
+            render();
+            updFilt();
+
+            // Conectar ao Socket.IO se estiver em uma sala
+            if (salaAtual !== 'local') {
+                conectarSocket(salaAtual, true);
+            }
+
+            console.log('🚀 Admin iniciado!');
+            console.log(`🏠 Sala: ${salaAtual}`);
+            console.log(`📦 ${db.length} produtos`);
+        }
+
+        // ============================================
+        // SOCKET.IO
+        // ============================================
+        function conectarSocket(sala, admin = false) {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+
+            const socketURL = window.location.origin;
+
+            socket = io(socketURL, {
+                query: { sala: sala, role: admin ? 'admin' : 'cliente' },
+                transports: ['websocket', 'polling'],
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000
+            });
+
+            document.getElementById('socketStatus').className = 'status-socket conectando';
+            document.getElementById('socketStatus').textContent = '🔌 Conectando...';
+
+            socket.on('connect', () => {
+                document.getElementById('socketStatus').className = 'status-socket online';
+                document.getElementById('socketStatus').textContent = '🔌 Online';
+                document.getElementById('status').innerHTML = `✅ Conectado à sala: ${sala}`;
+                console.log(`✅ Conectado à sala: ${sala}`);
+
+                // Enviar dados para o servidor
+                if (admin) {
+                    socket.emit('sync_db', { sala: sala, data: db });
+                } else {
+                    socket.emit('request_db', { sala: sala });
+                }
+            });
+
+            socket.on('db_update', (data) => {
+                console.log(`📥 Dados recebidos: ${data.length} produtos`);
+                db = data;
+                localStorage.setItem('gpx_db_admin', JSON.stringify(db));
+
+                // Salvar também na lista de salas
+                const salasData = JSON.parse(localStorage.getItem('salas_locais_admin') || '{}');
+                salasData[salaAtual] = db;
+                localStorage.setItem('salas_locais_admin', JSON.stringify(salasData));
+
+                render();
+                updFilt();
+                document.getElementById('status').innerHTML = `✅ ${db.length} produtos sincronizados`;
+            });
+
+            socket.on('chat_message', (msg) => {
+                addMsg(msg.texto, msg.remetente === 'admin' ? 'me' : 'them');
+                document.getElementById('notif').style.display = 'inline';
+            });
+
+            socket.on('connect_error', (err) => {
+                console.error('❌ Erro de conexão:', err);
+                document.getElementById('socketStatus').className = 'status-socket offline';
+                document.getElementById('socketStatus').textContent = '🔌 Offline';
+                document.getElementById('status').innerHTML = '⚠️ Erro ao conectar: ' + err.message;
+            });
+
+            socket.on('disconnect', () => {
+                document.getElementById('socketStatus').className = 'status-socket offline';
+                document.getElementById('socketStatus').textContent = '🔌 Offline';
+                document.getElementById('status').innerHTML = '⚠️ Desconectado';
+            });
+
+            document.getElementById('realtimeBadge').className = 'realtime-badge online';
+            document.getElementById('realtimeBadge').textContent = '🟢 Online';
+        }
+
+        function enviarDadosSocket() {
+            if (socket && salaAtual !== 'local') {
+                socket.emit('sync_db', { sala: salaAtual, data: db });
+                console.log('📤 Dados enviados via Socket.IO');
+            }
+        }
+
+        // ============================================
+        // SALAS
+        // ============================================
+        function criarSala() {
+            const nome = prompt('Nome da sala (ex: loja1):');
+            if (!nome) return;
+
+            salaAtual = nome;
+            localStorage.setItem('sala_atual_admin', salaAtual);
+            document.getElementById('salaBadge').textContent = `🏠 Sala: ${nome}`;
+
+            const salasData = JSON.parse(localStorage.getItem('salas_locais_admin') || '{}');
+            if (!salasData[nome]) {
+                salasData[nome] = JSON.parse(JSON.stringify(db));
+                localStorage.setItem('salas_locais_admin', JSON.stringify(salasData));
+            } else {
+                db = salasData[nome];
+                localStorage.setItem('gpx_db_admin', JSON.stringify(db));
+            }
+
+            render();
+            updFilt();
+            conectarSocket(nome, true);
+            alert(`✅ Sala "${nome}" criada! Clique em 🔗 Copiar Link da Sala para compartilhar.`);
+        }
+
+        // ============================================
+        // GERAR CÓDIGO DA SALA
+        // ============================================
+        function gerarCodigoSala() {
+            if (salaAtual === 'local' || !salaAtual) {
+                alert('⚠️ Crie uma sala primeiro! Use 📡 Criar Sala.');
+                return;
+            }
+
+            // Dados para o código
+            const dadosSala = {
+                sala: salaAtual,
+                url: window.location.origin,
+                tipo: 'socket'
+            };
+
+            const jsonStr = JSON.stringify(dadosSala);
+            const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+            const linkCompleto = `${window.location.origin}/sala.html?codigo=${base64}`;
+
+            document.getElementById('codigoGerado').textContent = linkCompleto;
+            openM('m-codigo');
+        }
+
+        function copiarCodigo() {
+            const codigo = document.getElementById('codigoGerado').textContent;
+            navigator.clipboard.writeText(codigo).then(() => {
+                alert('✅ Link copiado! Compartilhe com seus clientes.');
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = codigo;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('✅ Link copiado!');
+            });
+        }
+
+        // ============================================
+        // CRUD
+        // ============================================
+        function openEdit(id = null) {
+            if (id) {
+                const p = db.find(x => x.id == id);
+                document.getElementById('e-id').value = p.id;
+                document.getElementById('e-n').value = p.name;
+                document.getElementById('e-c').value = p.cat;
+                document.getElementById('e-p').value = p.price;
+                document.getElementById('e-x').value = p.pix;
+            } else {
+                document.getElementById('e-id').value = '';
+                document.querySelectorAll('#m-edit input:not([type="file"])').forEach(i => i.value = '');
+                document.getElementById('e-i').value = '';
+            }
+            openM('m-edit');
+        }
+
+        function save() {
+            const id = document.getElementById('e-id').value;
+            const file = document.getElementById('e-i').files[0];
+            const act = (img = null) => {
+                const produto = {
+                    id: id || Date.now().toString(),
+                    name: document.getElementById('e-n').value || 'Sem nome',
+                    cat: document.getElementById('e-c').value || 'Geral',
+                    price: parseFloat(document.getElementById('e-p').value) || 0,
+                    pix: document.getElementById('e-x').value || '',
+                    img: img || (id ? db.find(x => x.id == id).img : null)
+                };
+
+                if (id) {
+                    db = db.map(x => x.id == id ? produto : x);
+                } else {
+                    db.push(produto);
+                }
+
+                localStorage.setItem('gpx_db_admin', JSON.stringify(db));
+
+                const salasData = JSON.parse(localStorage.getItem('salas_locais_admin') || '{}');
+                if (salasData[salaAtual]) {
+                    salasData[salaAtual] = db;
+                    localStorage.setItem('salas_locais_admin', JSON.stringify(salasData));
+                }
+
+                enviarDadosSocket();
+                closeM();
+                render();
+                updFilt();
+                document.getElementById('status').innerHTML = `✅ Produto salvo! (${db.length} produtos)`;
+            };
+
+            if (file) {
+                const r = new FileReader();
+                r.onload = e => act(e.target.result);
+                r.readAsDataURL(file);
+            } else {
+                act();
+            }
+        }
+
+        function del(id) {
+            if (!confirm("Remover este produto?")) return;
+            db = db.filter(x => x.id != id);
+            localStorage.setItem('gpx_db_admin', JSON.stringify(db));
+
+            const salasData = JSON.parse(localStorage.getItem('salas_locais_admin') || '{}');
+            if (salasData[salaAtual]) {
+                salasData[salaAtual] = db;
+                localStorage.setItem('salas_locais_admin', JSON.stringify(salasData));
+            }
+
+            enviarDadosSocket();
+            render();
+            updFilt();
+            document.getElementById('status').innerHTML = `✅ Produto removido! (${db.length} produtos)`;
+        }
+
+        // ============================================
+        // PAYMENT
+        // ============================================
+        function openPay(id) {
+            const p = db.find(x => x.id == id);
+            if (!p) return;
+            document.getElementById('p-n').textContent = '📦 ' + p.name;
+            document.getElementById('p-x').textContent = p.pix || 'Chave PIX não cadastrada';
+            document.getElementById('p-p').textContent = 'R$ ' + parseFloat(p.price).toFixed(2);
+            openM('m-pay');
+        }
+
+        function copyPix() {
+            const key = document.getElementById('p-x').textContent;
+            if (key && key !== 'Chave PIX não cadastrada') {
+                navigator.clipboard.writeText(key);
+                alert('✅ Chave PIX copiada!');
+            }
+        }
+
+        function copyDevPix() {
+            navigator.clipboard.writeText("2c04642f-fbb7-40b0-9efb-434184b133f4");
+            alert('✅ Chave copiada! Gratidão!');
+        }
+
+        // ============================================
+        // CHAT
+        // ============================================
+        function toggleChat() {
+            const w = document.getElementById('chat-win');
+            w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
+            document.getElementById('notif').style.display = 'none';
+        }
+
+        function sendChat() {
+            const input = document.getElementById('chat-i');
+            if (!input.value || !socket) return;
+            socket.emit('chat_message', { sala: salaAtual, msg: input.value });
+            input.value = '';
+        }
+
+        function addMsg(t, s) {
+            const d = document.createElement('div');
+            d.innerText = t;
+            d.style.padding = '8px';
+            d.style.borderRadius = '8px';
+            d.style.maxWidth = '80%';
+            d.style.alignSelf = s === 'me' ? 'flex-end' : 'flex-start';
+            d.style.background = s === 'me' ? 'var(--primary)' : 'var(--border)';
+            d.style.color = s === 'me' ? 'white' : 'var(--text)';
+            document.getElementById('msgs').appendChild(d);
+            document.getElementById('msgs').scrollTop = document.getElementById('msgs').scrollHeight;
+        }
+
+        // ============================================
+        // RENDER
+        // ============================================
+        function render() {
+            const list = document.getElementById('list');
+            const q = document.getElementById('srch').value.toLowerCase();
+            const f = document.getElementById('filt').value;
+            const res = db.filter(p => p.name.toLowerCase().includes(q) && (f === 'Tudo' || p.cat === f));
+
+            if (res.length === 0) {
+                list.innerHTML =
+                    `<div style="grid-column:1/-1;text-align:center;padding:40px;color:#999;">Nenhum produto.</div>`;
+                return;
+            }
+
+            list.innerHTML = res.map(p => `
+                <div class="card">
+                    ${p.img ? `<img src="${p.img}" onerror="this.style.display='none'">` : `<div style="height:110px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#999;">📷</div>`}
+                    <small style="font-weight:bold;color:var(--primary)">${p.cat}</small>
+                    <strong>${p.name}</strong>
+                    <span style="color:var(--primary);font-weight:bold">R$ ${parseFloat(p.price).toFixed(2)}</span>
+                    <button class="btn-p" style="padding:6px;font-size:0.8rem" onclick="openPay('${p.id}')">🛒 Comprar</button>
+                    <div style="display:flex;gap:4px;margin-top:5px">
+                        <button class="btn-s" style="padding:4px" onclick="openEdit('${p.id}')">✏️</button>
+                        <button class="btn-s" style="padding:4px;color:var(--danger)" onclick="del('${p.id}')">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updFilt() {
+            const cats = ['Tudo', ...new Set(db.map(x => x.cat).filter(Boolean))];
+            document.getElementById('filt').innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        // ============================================
+        // EXPORT/IMPORT
+        // ============================================
+        function exportData() {
+            const a = document.createElement('a');
+            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ produtos: db, sala: salaAtual }));
+            a.download = `gestaopix_${salaAtual}.json`;
+            a.click();
+        }
+
+        function importData(e) {
+            const r = new FileReader();
+            r.onload = ev => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    if (data.produtos) {
+                        db = data.produtos;
+                        localStorage.setItem('gpx_db_admin', JSON.stringify(db));
+                        const salasData = JSON.parse(localStorage.getItem('salas_locais_admin') || '{}');
+                        salasData[salaAtual] = db;
+                        localStorage.setItem('salas_locais_admin', JSON.stringify(salasData));
+                        enviarDadosSocket();
+                        render();
+                        updFilt();
+                        alert('✅ Importado!');
+                    }
+                } catch (err) { alert('❌ Erro: ' + err.message); }
+            };
+            r.readAsText(e.target.files[0]);
+        }
+
+        // ============================================
+        // UI
+        // ============================================
+        function openM(id) { document.getElementById(id).style.display = 'flex'; }
+
+        function closeM() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+
+        function toggleTheme() {
+            const h = document.documentElement;
+            h.setAttribute('data-theme', h.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+        }
+
+        function toggleSide() { document.body.classList.toggle('menu-right'); }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
